@@ -54,12 +54,12 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
                 <dt className="text-muted">Links</dt>
                 <dd className="m-0 flex flex-wrap gap-4">
                   {p.links.live && (
-                    <a href={p.links.live} rel="noopener" className="text-accent underline underline-offset-4">
+                    <a href={p.links.live} rel="noopener" className="inline-flex min-h-11 items-center text-accent underline underline-offset-4">
                       Live site
                     </a>
                   )}
                   {p.links.repo && (
-                    <a href={p.links.repo} rel="noopener" className="text-accent underline underline-offset-4">
+                    <a href={p.links.repo} rel="noopener" className="inline-flex min-h-11 items-center text-accent underline underline-offset-4">
                       Repository
                     </a>
                   )}
