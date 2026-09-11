@@ -17,6 +17,7 @@ type Entry = MetadataRoute.Sitemap[number]
 const FIXED: [path: string, priority: number][] = [
   ['/', 1],
   ['/work', 0.8],
+  ['/notes', 0.7],
   ['/about', 0.8],
   ['/resume', 0.8],
 ]
