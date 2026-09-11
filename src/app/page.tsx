@@ -5,6 +5,8 @@ import { ProjectTeaser } from '@/components/project-teaser'
 import { SITE } from '@/lib/site'
 import { publishedProjects } from '@/lib/projects'
 import { ALSO_BUILT } from '@/lib/also-built'
+import { publishedNotes } from '@/lib/notes'
+import { longDate } from '@/lib/dates'
 
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
@@ -13,6 +15,7 @@ export const metadata: Metadata = { alternates: { canonical: '/' } }
 // with no edit to this file. Sections with nothing to show render nothing.
 export default function HomePage() {
   const projects = publishedProjects()
+  const notes = publishedNotes().slice(0, 3)
 
   return (
     <>
@@ -79,7 +82,28 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Notes teasers land here in Phase 5, when /notes/[slug] exists; typed routes refuse the href before then. */}
+      {notes.length > 0 && (
+        <section aria-labelledby="notes" className="border-t border-line">
+          <Container className="py-12 sm:py-16">
+            <h2 id="notes" className="text-[1.375rem]">
+              Notes
+            </h2>
+            <ul className="mt-6 list-none space-y-4 p-0">
+              {notes.map((n) => (
+                <li key={n.slug} className="m-0 max-w-[62ch]">
+                  <p className="m-0 font-medium">
+                    <Link href={`/notes/${n.slug}`} className="text-foreground underline underline-offset-4 decoration-accent">
+                      {n.title}
+                    </Link>
+                    <span className="ml-2 text-sm text-muted tnum">{longDate(n.date)}</span>
+                  </p>
+                  <p className="m-0 mt-1 text-muted-strong">{n.summary}</p>
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </section>
+      )}
 
       <section aria-labelledby="contact" className="border-t border-line">
         <Container className="py-16 sm:py-20">

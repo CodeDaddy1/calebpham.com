@@ -1,0 +1,62 @@
+A colour token that carries text has to clear the accessibility floor on every surface it can land on. That sounds obvious and it is not what most contrast checks do. They check the token against one background, usually the page, and stop.
+
+## The decision
+
+LumaIQ's contrast test measures every text token three ways: on the white card, on the page tone behind the card, and on the token's own tint, the wash a status pill or a callout puts under its own label. The floor is WCAG AA, 4.5 to 1, for all three, and the tint is composited over each surface before it is measured, because a translucent wash lifts the surface under the text by a different amount on white than on grey.
+
+<CodeQuote file="src/app/globals.contrast.test.ts" lines="121 to 160">
+
+```ts
+  // A semantic colour is very often set as text on its OWN 8–15% tint — a
+  // danger count on a danger-washed row, an accent label on an accent chip.
+  // That tint is a third surface, and it is the one these tokens fail on
+  // first: --danger cleared white at 4.83:1 and its own tint at only 4.28:1.
+  // Checking card and page alone does not catch that.
+  //
+  // Two things were missing here and both hid a real failure. --warning was
+  // not on this list at all, though Badge's warning pill is the most-used
+  // status tone in the app. And the tint was only ever composited over the
+  // CARD — but a status pill usually sits on the PAGE, in a bare list row or
+  // a header, and the page is darker, so the same ink loses roughly 0.3:1
+  // there. --warning measured 4.46:1 on the card and 4.16:1 on the page;
+  // --info, 4.65:1 and 4.33:1. Both passed every assertion this file had.
+  //
+  // Every semantic ink now has a DECLARED tint token rather than a wash the
+  // call site picks. That is the point: an arbitrary `bg-[var(--accent)]/15`
+  // is a contrast decision made in a className, where nothing can measure it,
+  // and 15% is exactly the alpha at which the accent stops clearing AA. The
+  // `-soft` tokens are set to the widest alpha their ink survives, so a pill
+  // that uses one is correct by construction.
+  const TINTED: [string, string][] = [
+    ['--danger', '--danger-soft'],
+    ['--warning', '--warning-soft'],
+    ['--success', '--success-soft'],
+    ['--accent', '--accent-soft'],
+    ['--info', '--info-soft'],
+  ]
+
+  for (const [ink, tintToken] of TINTED) {
+    for (const [surfaceName, surface] of surfaces) {
+      it(`${ink} stays readable on its own tint over the ${surfaceName}`, () => {
+        const tint = resolve(t[tintToken], surface)
+        const ratio = contrast(resolve(t[ink], tint), tint)
+        expect(
+          ratio,
+          `${themeName} ${ink} on its own tint over the ${surfaceName} is ${ratio.toFixed(2)}:1, needs ${AA_NORMAL}:1`,
+        ).toBeGreaterThanOrEqual(AA_NORMAL)
+      })
+    }
+  }
+```
+
+</CodeQuote>
+
+## The measurement
+
+The first version of the test checked card and page and passed. Two failures hid behind it. The warning ink measured 4.46 to 1 on the card and 4.16 to 1 on the page, sitting on its own tint, and the info ink measured 4.65 and 4.33. Both cleared every assertion the file had, because the file never composited the tint. The muted text token, the most used token in the product, had shipped earlier at 2.78 to 1 across 610 call sites, 458 of them at 13 pixels or smaller, and nothing had been looking.
+
+The fix has two halves. Every semantic ink got a declared tint token at the widest alpha its ink survives, so a call site picks a token rather than inventing an opacity in a class name where nothing can measure it. And the test composites that tint over both surfaces and measures the ink on the result.
+
+## What breaks if this is wrong
+
+Nothing visible to whoever writes the code, which is the problem. The build stays green, the types are fine, and a store manager reading a delinquency count at a front counter under glare cannot make out the number. The failure is not a crash. It is somebody misreading a figure they act on.

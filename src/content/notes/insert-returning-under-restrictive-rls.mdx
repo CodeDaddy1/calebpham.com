@@ -1,0 +1,47 @@
+A row-level security policy can refuse an insert that every role is allowed to make, and the error message will say the row violates the policy. It does not. The policy cannot see the row yet.
+
+## The decision
+
+LumaIQ scopes a property table with a restrictive policy on all commands whose USING clause calls a function that checks the property is in the caller's scope. That check is an EXISTS against the same table. Under that policy, the client library's insert-then-select in one call, which is an INSERT with a RETURNING clause, fails for every authenticated role, org admins included.
+
+The fix is a pattern, not a policy change: mint the row's id on the client, insert without asking for the row back, then read it in a second command.
+
+<CodeQuote file="src/lib/owner-reports/db.ts" lines="398 to 420">
+
+```ts
+  // NOT insert().select(): the "property scope" RESTRICTIVE policy's USING
+  // clause runs property_in_scope(id) against any row RETURNING hands back,
+  // and that function's EXISTS cannot see a row the same command just
+  // inserted — so every authenticated INSERT…RETURNING on this table is
+  // refused, even for an org admin. Insert under a client-minted id, then
+  // read the row back as a second command, which can see it.
+  const id = crypto.randomUUID()
+  const { error: insErr } = await sb
+    .from('owner_report_properties')
+    .insert({
+      id,
+      company_id: companyId,
+      name,
+      full_name: report.propertyName,
+      address: report.address,
+      total_units: report.metrics.total_units ?? null,
+      rentable_sqft: report.metrics.total_sqft ?? null,
+    })
+  if (insErr) throw new Error(`createPropertyFromReport insert: ${insErr.message}`)
+  const created = await getProperty(sb, id)
+  if (!created) {
+    throw new Error('createPropertyFromReport: the created property could not be read back')
+  }
+```
+
+</CodeQuote>
+
+## The measurement
+
+Postgres applies a policy's USING expression to the rows a RETURNING clause hands back. The policy function is declared stable, so it runs on the command's own snapshot, and that snapshot does not include rows the same command inserted. The EXISTS finds nothing and the whole insert is refused with "new row violates row-level security policy". A bare INSERT without RETURNING passes, and a later SELECT can see the row.
+
+It was found on 2026-09-01 during a month-close smoke test. It had silently broken workbook-first onboarding for every authenticated user since the scope policy landed, and nobody noticed because the first tenant's registry predates the policy and the demo seeder uses the service role, which bypasses policies. The only thing that could catch it was a probe as the authenticated role, which is now the rule for any change to a policy.
+
+## What breaks if this is wrong
+
+A feature that works for the developer, the demo, and the first customer, and fails for the second customer on day one. The error looks like a permissions bug, so the first hour is spent widening a policy that was never the problem.
