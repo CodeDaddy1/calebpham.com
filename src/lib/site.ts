@@ -13,11 +13,8 @@
 
 const FALLBACK = 'https://calebpham.com'
 
-/** The variables the resolver reads, so a test can hand it explicit inputs. */
-export interface SiteUrlEnv {
-  NEXT_PUBLIC_SITE_URL?: string
-  VERCEL_PROJECT_PRODUCTION_URL?: string
-}
+/** An env-shaped bag (process.env or a test literal); the resolver reads two keys. */
+export type SiteUrlEnv = Readonly<Record<string, string | undefined>>
 
 export function resolveSiteUrl(env: SiteUrlEnv): string {
   const explicit = env.NEXT_PUBLIC_SITE_URL?.trim()
