@@ -1,6 +1,7 @@
 // The notes index. Same contract as projects.ts: prose in
 // src/content/notes/<slug>.mdx, everything else here. Each note is a claim in
-// Caleb's name, signed off in the pull request that adds it.
+// Caleb's name, signed off in the pull request that adds it. A note he has
+// not signed stays `draft`: it has a file and an index entry, and no page.
 
 import type { Status } from './projects'
 
@@ -22,7 +23,7 @@ export const NOTES: readonly Note[] = [
     summary: 'A token that clears the accessibility floor on the page and fails on its own tint fails silently, so the test composites the tint over both surfaces before it measures.',
     date: '2026-09-11',
     readingMinutes: 4,
-    status: 'published',
+    status: 'draft',
   },
   {
     slug: 'insert-returning-under-restrictive-rls',
@@ -38,7 +39,7 @@ export const NOTES: readonly Note[] = [
     summary: 'A composition that cannot read CSS variables carries a copy of the palette, and the copy drifts unless a test compares it to the live tokens.',
     date: '2026-09-11',
     readingMinutes: 3,
-    status: 'published',
+    status: 'draft',
   },
 ]
 
