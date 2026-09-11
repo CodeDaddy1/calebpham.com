@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { SITE } from '@/lib/site'
 import { Container } from './container'
 
-// Navigation items land here in Phase 1 as their routes come to exist:
-// typedRoutes rejects an href to a page that is not on disk yet.
+// Navigation items land here as their routes come to exist: typedRoutes
+// rejects an href to a page that is not on disk yet, so the list grows with
+// the phases (Work now; Notes, About, Resume as they ship).
 export function SiteHeader() {
   return (
     <header className="border-b border-line">
@@ -11,7 +12,11 @@ export function SiteHeader() {
         <Link href="/" className="font-serif text-[1.25rem] font-medium text-foreground no-underline">
           {SITE.name}
         </Link>
-        <nav aria-label="Primary" className="flex items-center gap-6 text-[0.9375rem]" />
+        <nav aria-label="Primary" className="flex items-center gap-6 text-[0.9375rem]">
+          <Link href="/work" className="text-muted-strong no-underline hover:text-accent">
+            Work
+          </Link>
+        </nav>
       </Container>
     </header>
   )
