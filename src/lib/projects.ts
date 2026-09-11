@@ -42,7 +42,7 @@ export const PROJECTS: readonly Project[] = [
     role: 'Sole engineer',
     period: { start: '2026-06', end: null },
     stack: ['Python 3.9', 'ffmpeg', 'faster-whisper', 'Pillow', 'DaVinci Resolve scripting'],
-    status: 'draft',
+    status: 'published',
     links: { repo: 'https://github.com/CodeDaddy1/the-ninth-room' },
   },
   {
@@ -52,7 +52,7 @@ export const PROJECTS: readonly Project[] = [
     role: 'Sole engineer',
     period: { start: '2026-06', end: '2026-06' },
     stack: ['Next.js 16', 'TypeScript', 'Supabase Postgres', 'pgvector', 'Anthropic'],
-    status: 'draft',
+    status: 'published',
     links: { repo: 'https://github.com/CodeDaddy1/MDCB_Study' },
   },
 ]
