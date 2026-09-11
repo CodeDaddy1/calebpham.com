@@ -199,6 +199,7 @@ small, .meta, figcaption { font-size: 0.875rem; }   /* 14px is the floor; nothin
 
 .skip-link {
   position: absolute; left: 1rem; top: -100%; z-index: 50;
+  display: inline-flex; align-items: center; min-height: 2.75rem;
   background: var(--accent); color: #FFFFFF;
   padding: 0.5rem 1rem; border-radius: 9999px;
 }
@@ -206,7 +207,6 @@ small, .meta, figcaption { font-size: 0.875rem; }   /* 14px is the floor; nothin
 
 ::selection { background: var(--accent-soft); color: var(--foreground); }
 
-@media (pointer: coarse) { nav a, footer a, .pill { min-height: 2.75rem; } }
 
 /* Prose --------------------------------------------------------------------- */
 .prose { max-width: var(--measure); }

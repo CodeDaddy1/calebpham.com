@@ -10,17 +10,17 @@ export function SiteFooter() {
         </p>
         <ul className="m-0 flex list-none gap-6 p-0">
           <li>
-            <a href={`mailto:${SITE.email}`} className="hover:text-accent">
+            <a href={`mailto:${SITE.email}`} className="inline-flex min-h-11 items-center hover:text-accent">
               Email
             </a>
           </li>
           <li>
-            <a href={SITE.linkedin} rel="noopener" className="hover:text-accent">
+            <a href={SITE.linkedin} rel="noopener" className="inline-flex min-h-11 items-center hover:text-accent">
               LinkedIn
             </a>
           </li>
           <li>
-            <a href={SITE.github} rel="noopener" className="hover:text-accent">
+            <a href={SITE.github} rel="noopener" className="inline-flex min-h-11 items-center hover:text-accent">
               GitHub
             </a>
           </li>

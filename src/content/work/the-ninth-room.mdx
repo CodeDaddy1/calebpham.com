@@ -2,13 +2,13 @@
 
 The Ninth Room is a YouTube channel: a family explores the world's most interesting places, and every episode finds the one thing that was not on the map. I host and narrate. This repository is the program that edits the episodes.
 
-Raw footage goes into a work folder and one command runs the pipeline: it transcribes the takes locally with faster-whisper, picks the best take of each line, cuts dead space, designs the story, builds the timeline in DaVinci Resolve with cuts, transitions, brand cards and captions, and renders the finished episode. No cloud, no paid APIs. Editorial judgment runs as Claude Code subagents reading the transcript and the brief, and the numbers that gate a cut come from film studies I wrote up first.
+Raw footage goes into a work folder and one command runs the pipeline: it transcribes the takes locally with faster-whisper, picks the best take of each line, cuts dead space, designs the story, builds the timeline in DaVinci Resolve with cuts, transitions, brand cards and captions, and renders the finished episode. Every stage runs on the machine by default; the two paid cloud paths are opt-in extras, a flag that sends transcription to a hosted speech model when proper nouns matter and a pull from a licensed sound library. Editorial judgment runs as Claude Code subagents reading the transcript and the brief, and the numbers that gate a cut come from film studies I wrote up first.
 
 <Figure src="/work/the-ninth-room/01-chapter-card.webp" alt="A Ninth Room chapter card rendered by the pipeline: the arch-door chapter meter with the first of five doors lit yellow, the cyan eyebrow First Stop, and the chalk title The Cockrell Butterfly Center with a butterfly emoji, on navy." width={1600} height={900} caption="A chapter card, rendered by the overlay kit and composited on the brand's navy. One yellow moment per frame; the doors are the episode's real chapter count." />
 
 ## How it is built
 
-Python 3.9 on the interpreter macOS ships, plus ffmpeg, Pillow, and headless Chrome for the cards. There is no web service and no database: an episode is a folder of files, and every stage reads the files the stage before it wrote. The repository has 271 commits and 75 test files, run with the standard library's unittest.
+Python 3.9 on the interpreter macOS ships, plus ffmpeg, Pillow, and headless Chrome for the cards. The only service is a loopback-only engine, an HTTP API and media server on the machine itself, and there is no database: an episode is a folder of files, and every stage reads the files the stage before it wrote. The repository has 271 commits and 75 test files, run with the standard library's unittest.
 
 The hard part was DaVinci Resolve. Its scripting API cannot be driven from outside the application reliably, so the pipeline installs a small Lua script inside Resolve that loops forever watching a spool directory. Python writes a Lua chunk into the inbox, the bridge runs it with Resolve's own objects and writes a result file, and Python reads it back. Every timeline import, proxy link, and render request goes through that one door.
 
@@ -58,7 +58,7 @@ def send(label: str, lua: str, timeout: float = 120.0) -> str:
 
 ## The bar a cut must clear
 
-The first finished episode was a transcript in shoot order: 82 beats, 78 percent of them purpose "build", one hook, one payoff, and a pace of 12.6 cuts a minute against the 18 to 22 that the channels I studied run. Nothing in the pipeline had checked. So the craft bar exists, and it is written down before the code.
+The shipped first cut was a transcript in shoot order: 82 beats, 78 percent of them purpose "build", one hook, one payoff, and a pace of 12.6 cuts a minute against the 18 to 22 that the channels I studied run. Nothing in the pipeline had checked. So the craft bar exists, and it is written down before the code.
 
 <CodeQuote file="pipeline/cutbar.py" lines="1 to 33" href="https://github.com/CodeDaddy1/the-ninth-room/blob/86d24e9e941a1a58a5cee1cb6c88403b81f03d7a/pipeline/cutbar.py#L1-L33">
 
@@ -102,7 +102,7 @@ against the plan, not the truth of the finished timeline.
 
 **Decision.** The numbers that gate a cut live in one pure module with two entry points: one returns the metrics and never blocks, the other returns the notes a cut must clear and an empty list is a pass. Both take parsed dictionaries in and give numbers or sentences out, so they can be run on a plan that is half edited without raising.
 
-**Measurement.** The thresholds come from three channels I studied and wrote up: 18.5, 21.6, and 18.8 cuts a minute. The shipped first cut measured 12.6. The pace estimate counts visual state changes in the plan (each beat one, each cover two) and is approximate on purpose; it compares the shape of the declared ladder against the plan, not the truth of the finished timeline.
+**Measurement.** The thresholds come from three channels I studied and wrote up: 18.5, 21.6, and 18.8 cuts a minute. The shipped first cut measured 12.6. The pace estimate counts visual state changes in the plan (each beat one, each cover two, plus punch-ins and in-beat cuts) and is approximate on purpose; it compares the shape of the declared ladder against the plan, not the truth of the finished timeline.
 
 **What breaks if wrong.** An episode ships flat and nobody can say why, because the only check was that a file appeared. The bar turns a taste argument into a number a subagent can be told to clear.
 
