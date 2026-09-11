@@ -1,10 +1,10 @@
 ## What it is
 
-A study application for the Medical Dosimetry Certification Board exam, built for one student: me. Upload the course handouts and answer keys, and it produces multiple-choice questions where every option carries a rationale and every question cites the passage it came from. It is a small repository, five commits over two days in June 2026, and the interesting part is the rule it enforces.
+A multi-user study application in the Quizlet mould, whose first deck is my own material for the Medical Dosimetry Certification Board exam. Upload the course handouts and answer keys, and it produces multiple-choice questions where every option carries a rationale and every stored question cites the passage it came from. It is a small repository, five commits in a single evening in June 2026, and the interesting part is the rule it enforces.
 
 ## The grounding rule
 
-Only verified questions are ever served. A question is drafted by one model from retrieved source chunks, then a second, cheaper model is asked one thing: is the proposed answer fully supported by the cited chunks? If not, the question is never written as verified, and the quiz page reads only verified rows. Two runtime agents exist, a Source Expert that ingests, retrieves, and verifies, and a Quiz Generator that drafts; everything else, scores, streaks, the calendar, is plain SQL.
+Only verified questions are ever served. A question is drafted by one model from retrieved source chunks, then a second, cheaper model is asked one thing: is the proposed answer fully supported by the cited chunks? If not, the question is never written as verified, and the quiz page reads only verified rows. Two runtime agents exist, a Source Expert that ingests, extracts concepts, retrieves, and verifies, and a Quiz Generator that drafts; they hold every model call in the app, and the scoring and streak layer is specified as plain SQL.
 
 Retrieval is a vector search in Postgres. Chunks carry a 1,024-dimension embedding, and one SQL function returns the nearest chunks for a query inside one deck.
 
@@ -93,9 +93,9 @@ export async function verify(input: VerifyInput): Promise<VerifyResult> {
 
 </CodeQuote>
 
-**Decision.** The verifier sees only the cited chunks, the prompt, and the proposed answer, never the drafting model's reasoning, and it must answer in a fixed shape (supported, which chunk, why). A question with no citations fails before any model is called.
+**Decision.** The verifier is sent only the cited chunks, the question, and the proposed answer, never the drafting model's reasoning, and its reply is constrained to a fixed shape (supported, which chunk, why). A question with no citations is unsupported before any model is called.
 
-**Measurement.** Verification runs on a smaller model than drafting, so the check costs a fraction of the draft. The structured output is parsed against a schema, and a response that does not parse is treated as unsupported rather than as an error to retry past.
+**Measurement.** Verification runs on a smaller model than drafting, so the check costs a fraction of the draft. The reply is parsed against a schema, and a reply with no structured output is treated as unsupported rather than as an error to retry past.
 
 **What breaks if wrong.** A confident, well-written question whose answer is not in the source. On a board exam that is the most expensive kind of wrong, because it teaches the mistake with a rationale attached.
 

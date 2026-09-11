@@ -9,20 +9,20 @@ export function SiteHeader() {
   return (
     <header className="border-b border-line" data-print-hide>
       <Container className="flex h-16 items-center justify-between">
-        <Link href="/" className="font-serif text-[1.25rem] font-medium text-foreground no-underline">
+        <Link href="/" className="inline-flex min-h-11 items-center font-serif text-[1.25rem] font-medium text-foreground no-underline">
           {SITE.name}
         </Link>
         <nav aria-label="Primary" className="flex items-center gap-6 text-[0.9375rem]">
-          <Link href="/work" className="text-muted-strong no-underline hover:text-accent">
+          <Link href="/work" className="inline-flex min-h-11 items-center text-muted-strong no-underline hover:text-accent">
             Work
           </Link>
-          <Link href="/notes" className="text-muted-strong no-underline hover:text-accent">
+          <Link href="/notes" className="inline-flex min-h-11 items-center text-muted-strong no-underline hover:text-accent">
             Notes
           </Link>
-          <Link href="/about" className="text-muted-strong no-underline hover:text-accent">
+          <Link href="/about" className="inline-flex min-h-11 items-center text-muted-strong no-underline hover:text-accent">
             About
           </Link>
-          <Link href="/resume" className="text-muted-strong no-underline hover:text-accent">
+          <Link href="/resume" className="inline-flex min-h-11 items-center text-muted-strong no-underline hover:text-accent">
             Resume
           </Link>
         </nav>

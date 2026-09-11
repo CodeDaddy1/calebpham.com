@@ -21,7 +21,7 @@ export default function WorkPage() {
       </p>
       <div className="mt-12 grid gap-6 sm:grid-cols-2">
         {publishedProjects().map((p) => (
-          <ProjectTeaser key={p.slug} project={p} />
+          <ProjectTeaser key={p.slug} project={p} headingLevel="h2" />
         ))}
       </div>
     </Container>
