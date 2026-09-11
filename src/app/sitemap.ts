@@ -14,7 +14,10 @@ const BUILD_DATE = new Date()
 
 type Entry = MetadataRoute.Sitemap[number]
 
-const FIXED: [path: string, priority: number][] = [['/', 1]]
+const FIXED: [path: string, priority: number][] = [
+  ['/', 1],
+  ['/work', 0.8],
+]
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const fixed: Entry[] = FIXED.map(([path, priority]) => ({

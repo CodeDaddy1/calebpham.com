@@ -1,0 +1,124 @@
+## The problem from the floor
+
+I was the Houston area manager for seven self-storage properties and 4,000 units before I wrote a line of this. Month-end meant the same work at every store: pull the storEDGE reports, retype the figures the management system leaves out, reconcile them in a spreadsheet, and send each owner a report that looked like every other month's. The questions the owners asked were good ones. The tools to answer them did not exist, so the answers lived in spreadsheets that stopped scaling long before anyone admitted it.
+
+LumaIQ is the tool I wanted then. I started it in April 2026 and have built it alone from concept through production.
+
+## What it is
+
+Asset management software for self-storage operators, sold to multiple tenant companies. It reads the exports an operator already produces and turns them into the decisions an operator actually has to make. The surfaces group under three outcomes:
+
+- **Grow revenue.** Rate Increases, Rate Board, Comp Reports, Market Map.
+- **Control cost and risk.** Delinquency and Lien, Accounting, Property Audits, Field Ops.
+- **Report the result.** Owner Reports, Budget and Pro Forma, Ranking Reports, Home.
+
+<Figure src="/work/lumaiq/01-owner-reports.webp" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} caption="Owner Reports, the month-end desk. Every row is a store, every pill is what still stands between it and a sent report. Demo tenant, no client data." />
+
+Every competitor rate a tenant records is typed or pasted by a person (demo tenants are seeded with generated filler). Nothing fetches a competitor's site, and adding that is not on the table.
+
+## How it is built
+
+Next.js 16 on the App Router, React 19, TypeScript, Tailwind CSS 4, deployed on Vercel. Postgres on Supabase holds every tenant, and row-level security is the boundary: every tenant table hangs off a company id (the platform, careers, and security-ledger tables sit outside the tenant model on purpose, with no company id at all), application code queries through the user's own session, and the service role is confined to server-side routes and actions, most of which explain themselves in a comment at the call site. The policies are migrations, and they ship through review like any other code.
+
+Owner reports come in as storEDGE PDFs and workbooks, get parsed into one metric model, and go back out as a generated workbook with the owner's email and a delivery ledger. Rate increases run on two storEDGE exports, the rent roll by tenant and the unit availability by group, because a tenant weighing a move-out is choosing against the units they could actually rent into.
+
+<Figure src="/work/lumaiq/02-rate-increases.webp" alt="LumaIQ Rate Increases, archived outcomes for the City Storage demo tenant: eight sent batches with proposed and kept dollars per property, churn after increase at 15.3 percent, 1,022 notices sent, and a calibration panel. Demo data." width={1600} height={1000} caption="Rate Increases, the outcomes tab: what past batches kept, not what they proposed. A move-out and a rolled-back increase both count as zero, which is the point of measuring here rather than at send. Demo tenant." />
+
+The suite is 2,453 tests in 176 files and runs on every push. Some of those tests walk the source tree and enforce architecture rather than behaviour: one fails any read of a large table that shows no explicit bound (paging, a range, a limit, a count, a single row, or a written reason), one measures every text-carrying colour token against the WCAG floor on both surfaces it can land on in both themes, one walks the public route directory so a new page cannot be left behind the sign-in wall.
+
+## Two pieces of it
+
+The characteristic failure in this product is a wrong number that raises no error. Two excerpts, each with the decision, the measurement behind it, and what breaks if it is wrong.
+
+<CodeQuote file="src/lib/supabase/page-all.ts" lines="28 to 54">
+
+```ts
+/** PostgREST's own ceiling. Asking for more in one request does not raise it. */
+export const PAGE_SIZE = 1000
+
+/**
+ * Every row the query matches, fetched in pages of 1000.
+ *
+ * Stops when a page comes back short, which is how you know it was the last
+ * one — a full page is ambiguous, since the next could be empty or could hold
+ * another thousand.
+ *
+ * Throws on the first error rather than returning a partial set. A partial
+ * read that looks successful is the failure this helper exists to prevent.
+ */
+export async function pageAll<T>(build: () => Pageable): Promise<T[]> {
+  const out: T[] = []
+  for (let from = 0; ; from += PAGE_SIZE) {
+    if (from >= MAX_PAGES * PAGE_SIZE) {
+      throw new Error(
+        `pageAll: more than ${MAX_PAGES * PAGE_SIZE} rows — this read needs a narrower filter, not a longer loop`)
+    }
+    const { data, error } = await build().range(from, from + PAGE_SIZE - 1)
+    if (error) throw new Error(String((error as { message?: string }).message ?? error))
+    const rows = (data ?? []) as T[]
+    out.push(...rows)
+    if (rows.length < PAGE_SIZE) return out
+  }
+}
+```
+
+</CodeQuote>
+
+**Decision.** Every read of a table that can grow past a thousand rows goes through this helper, and the helper takes a function that builds a fresh query rather than a query. A PostgREST query builder is consumed when it is awaited, so passing the query itself would paginate one exhausted builder and return the first page forever.
+
+**Measurement.** PostgREST caps every select at 1,000 rows and returns a successful response when it truncates. It was first written for the rate-increase outcome history, exactly the kind of series that starts midway when a read is silently capped. The helper reads in pages of 1,000, stops on the first short page, refuses to go past 50,000 rows, and throws on the first error instead of returning a partial set. A test walks the source and fails any uncapped read of a watched table, so the rule is enforced rather than remembered.
+
+**What breaks if wrong.** A total that omits the oldest months, a ranking built on part of a portfolio, an "all properties" list that is not all properties. Nothing crashes. Somebody acts on a number that is quietly too low.
+
+<CodeQuote file="src/lib/lien/schedule.ts" lines="25 to 60">
+
+```ts
+const MS_PER_DAY = 86_400_000
+
+function toUtc(date: string): number {
+  const [y, m, d] = date.split('-').map(Number)
+  return Date.UTC(y, m - 1, d)
+}
+
+const fromUtc = (ms: number): string => new Date(ms).toISOString().slice(0, 10)
+
+/** `date` shifted by whole days, as YYYY-MM-DD. */
+export function addDays(date: string, days: number): string {
+  return fromUtc(toUtc(date) + days * MS_PER_DAY)
+}
+
+/** Whole days from `from` to `to`; negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((toUtc(to) - toUtc(from)) / MS_PER_DAY)
+}
+
+/**
+ * The day this delinquency's clock started, from a roll that reported
+ * `delinquentDays` as of `asOf`.
+ */
+export function delinquentSince(asOf: string, delinquentDays: number): string {
+  return addDays(asOf, -Math.max(0, Math.round(delinquentDays)))
+}
+
+/** How far past due this case is on `on` — today, usually. */
+export function daysPastDueOn(since: string, on: string): number {
+  return daysBetween(since, on)
+}
+
+/** The calendar day a stage falls due for a case that started on `since`. */
+export function stageDueOn(since: string, stage: LienStage): string {
+  return addDays(since, stage.daysPastDue)
+}
+```
+
+</CodeQuote>
+
+**Decision.** The lien clock is anchored to a fixed calendar day, not a rolling count. A rent roll reports days delinquent as of its own date, so the count is stale the moment the roll is a day old, but the day the clock started is not. Every date on the lien calendar is computed from that day.
+
+**Measurement.** On the as-of date, the days past due reproduce the roll's own whole-day count exactly, which is how two rolls a month apart agree about when a notice was due. All arithmetic is on the calendar date in UTC: adding thirty days as thirty times 86,400 seconds to a local date crosses a daylight-saving boundary twice a year, and at the autumn crossing it lands the deadline an hour short, on the day before.
+
+**What breaks if wrong.** A notice due date moves because nobody uploaded a roll this week, and a manager is held to a deadline that shifted under them. In a lien process the deadline is statutory, so a wrong date is not a late task. It is a sale that can be challenged.
+
+## What it taught me
+
+The interesting work is where operations meets software: how the messy reality of running a business becomes a system that actually reflects it. The rules that matter most are the ones that fail silently, and the only defence I trust is a test that walks the code and refuses the shortcut before it ships.

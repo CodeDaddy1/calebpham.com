@@ -32,7 +32,7 @@ export const PROJECTS: readonly Project[] = [
     role: 'Founder and sole engineer',
     period: { start: '2026-04', end: null },
     stack: ['Next.js 16', 'React 19', 'TypeScript', 'Supabase Postgres', 'Tailwind CSS 4', 'Vercel'],
-    status: 'draft',
+    status: 'published',
     links: { live: 'https://www.lumaiq.dev' },
   },
   {
