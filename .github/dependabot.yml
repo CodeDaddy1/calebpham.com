@@ -1,0 +1,51 @@
+# Dependabot — keeps the dependency audit honest between reviews.
+#
+# Two ecosystems. npm updates arrive weekly as ONE grouped pull request for
+# every minor and patch bump, so a week's worth of transitive fixes is a single
+# CI run to read rather than fifteen. Majors are opened individually because a
+# major is a decision. `next`, `react` and `react-dom` never get a major from a
+# bot at all: package.json pins them exactly (Next 16 changed the middleware and
+# params contracts, and the next one will too) and a bump is a migration, not a
+# merge.
+#
+# GitHub Actions are pinned to commit SHAs in ci.yml; this is the only thing
+# that moves them, bumping the SHA and its version comment together.
+#
+# Dependabot ALERTS (the vulnerability feed) are a repository setting, not a
+# file — enable them under Settings → Code security. Without it this file only
+# tracks versions; the CI audit job is the gate that blocks a known HIGH.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "13:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: next
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react-dom
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "13:00"
+      timezone: Etc/UTC
+    commit-message:
+      prefix: "chore(ci)"

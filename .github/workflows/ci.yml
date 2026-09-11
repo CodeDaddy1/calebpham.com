@@ -1,0 +1,90 @@
+# Continuous integration: the checks that run on every push and pull request.
+#
+# Pushing to main deploys to production, and Vercel never reads these results.
+# Two things make a red commit unable to reach production anyway: `prebuild`
+# runs the test suite inside every Vercel build, and the ruleset on main
+# requires the two jobs below to pass before a push is accepted.
+#
+# No secrets are needed, and that is deliberate. The site has no environment
+# variables, no database, and no API keys. Keep it that way.
+
+name: CI
+
+# The token this workflow receives can read the repository and nothing else.
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+# A second push to the same branch cancels the first.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Type-check, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Pinned to commit SHAs, not floating tags: a tag can be moved by whoever
+      # holds the action's repository. All three actions below run on the
+      # node24 runtime; GitHub removes node20 from hosted runners on
+      # 2026-09-23. The version stays as a trailing comment so Dependabot can
+      # bump the SHA and the comment together.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      # `npm ci` installs exactly what package-lock.json pins and fails if the
+      # lockfile and package.json disagree.
+      - name: Install
+        run: npm ci
+
+      # Cheapest first. `typecheck` runs `next typegen` before tsc so the
+      # typed-routes declarations exist in a clean checkout.
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      # `prebuild` runs the test suite; a red test fails this step.
+      - name: Test and build
+        run: npm run build
+
+  secrets:
+    name: Secrets scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history, or gitleaks only sees the last commit.
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Blocks at high. A new advisory is either fixed (`npm audit fix`, never
+  # --force) or accepted with a dated note, and only then is the gate raised
+  # for that one advisory.
+  audit:
+    name: Dependency audit (blocks at high)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high

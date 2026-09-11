@@ -1,26 +1,302 @@
 @import "tailwindcss";
 
+/* ONE THEME. No .dark block, no @custom-variant dark, no prefers-color-scheme.
+   globals.light-only.test.ts fails the suite if any of the three appears.
+
+   Every text colour below carries its measured contrast ratio, computed with
+   the formula in globals.contrast.test.ts, which is the authority: if a value
+   here changes, that test re-measures it. The floor is WCAG AA, 4.5:1, on
+   BOTH surfaces a token can land on (page and card) and, for an accent, on its
+   own tint. A token that clears one surface and fails the other fails
+   silently, because the build stays green.                                    */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* Surfaces ------------------------------------------------------------ */
+  --background: #F6F1E8;                 /* paper */
+  --card:       #FFFDF9;                 /* cards, code blocks, figures */
+  --surface:    rgba(28, 26, 23, 0.04);  /* inline code, table stripe. Ink on it 14.24 */
+
+  /* Text ramp, measured on page / card:
+       foreground     15.43 / 17.09
+       muted-strong    9.70 / 10.74
+       muted           6.25 /  6.92     strong / muted = 1.55 (floor 1.3)     */
+  --foreground:   #1C1A17;
+  --muted-strong: #413C36;
+  --muted:        #5E5850;
+
+  /* Accent. The first pick, #B4531B, measured 4.45:1 on paper and 4.01 on its
+     own tint. One step darker: 5.51 page, 6.10 card, 4.82 on its tint over the
+     page, 5.28 over the card. White on it 6.20 (pill buttons).               */
+  --accent:       #9F4716;
+  --accent-hover: #7F3811;               /* 7.54 page, 8.35 card; white on it 8.48 */
+  /* The tint washes the BRIGHT step of the hue (#D9782F), not the ink. A wash
+     of a dark ink is mud, and it lifts the surface under the text less
+     predictably. Same rule LumaIQ learned with --warning-soft.               */
+  --accent-soft:  rgba(217, 120, 47, 0.14);
+
+  /* Hairlines. Decorative; no AA floor applies.                              */
+  --border:        rgba(28, 26, 23, 0.10);
+  --border-strong: rgba(28, 26, 23, 0.22);
+
+  /* Code inks. Code sits on --card; measured on page / card:
+       keyword 6.93 / 7.67   string 5.68 / 6.29   comment 6.25 / 6.92
+       function 7.39 / 8.18  constant 7.71 / 8.53 punctuation 9.70 / 10.74    */
+  --code-keyword:     #8A3A10;
+  --code-string:      #2F6B3A;
+  --code-comment:     #5E5850;
+  --code-function:    #1F4E8C;
+  --code-constant:    #7A2F65;
+  --code-punctuation: #413C36;
+  /* shiki's css-variables theme emits inline `color: var(--shiki-token-*)`.
+     The names below are the full set the theme emits (checked against
+     @shikijs/core createCssVariablesTheme on 2026-09-11).                    */
+  --shiki-foreground:              var(--foreground);
+  --shiki-background:              var(--card);
+  --shiki-token-keyword:           var(--code-keyword);
+  --shiki-token-string:            var(--code-string);
+  --shiki-token-string-expression: var(--code-string);
+  --shiki-token-comment:           var(--code-comment);
+  --shiki-token-function:          var(--code-function);
+  --shiki-token-constant:          var(--code-constant);
+  --shiki-token-parameter:         var(--foreground);
+  --shiki-token-punctuation:       var(--code-punctuation);
+  --shiki-token-link:              var(--accent);
+  --shiki-token-inserted:          var(--code-string);
+  --shiki-token-deleted:           var(--code-keyword);
+  --shiki-token-changed:           var(--code-function);
+
+  /* Swatch defaults. Outside a case study the swatch IS the accent, so a
+     component reading --swatch never resolves to nothing (an undefined custom
+     property is valid CSS and paints nothing; see globals.tokens.test.ts).   */
+  --swatch:      var(--accent);
+  --swatch-ink:  var(--accent);
+  --swatch-soft: var(--accent-soft);
+  --swatch-on:   #FFFFFF;
+
+  /* Radii: one value. Pills use rounded-full.                                */
+  --radius: 4px;
+
+  /* Motion: two durations, three curves. NEVER --ease-in / --ease-out:
+     Tailwind v4 defines those on :root and this block is emitted after
+     @import "tailwindcss", so redefining them rewrites every ease-in and
+     ease-out utility on the site.                                            */
+  --dur-hover:  150ms;
+  --dur-reveal: 320ms;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit:  cubic-bezier(0.4, 0, 1, 1);
+
+  /* Type                                                                     */
+  --measure: 66ch;
+  --font-sans-fallback:  system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-serif-fallback: Georgia, "Times New Roman", serif;
+  --font-mono-fallback:  ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* Project swatches, keyed by ROUTE SLUG. Four names:
+     --swatch       fills, rules, the mark. Never text.
+     --swatch-ink   text in the project colour, measured on page and card
+     --swatch-soft  the tint behind a pill or callout in that colour
+     --swatch-on    text ON a --swatch fill
+   The page sets data-swatch={slug}; nothing outside the article can reach
+   these. globals.contrast.test.ts measures every block below.                */
+[data-swatch='lumaiq'] {
+  --swatch:      #047857;                  /* LumaIQ green */
+  --swatch-ink:  #065F46;                  /* #047857 on its own tint over paper is 4.26, so text goes one step darker */
+  --swatch-soft: rgba(16, 185, 129, 0.14); /* wash of the bright step */
+  --swatch-on:   #FFFFFF;                  /* 5.48 on #047857 */
+}
+[data-swatch='the-ninth-room'] {
+  --swatch:      #0B2340;                  /* navy-900 */
+  --swatch-ink:  #0B2340;                  /* 14.05 page, 15.56 card */
+  --swatch-soft: rgba(11, 35, 64, 0.10);   /* navy on it 11.56 */
+  --swatch-on:   #EAF4FF;                  /* chalk on navy 14.21 */
+  --nr-chalk:    #EAF4FF;                  /* on navy only: 1.01 against paper */
+  --nr-yellow:   #FFE04D;                  /* rule, marker, fill under ink. 1.17 on paper: never ink */
+}
+[data-swatch='mdcb-study'] {
+  --swatch:      #7A2F65;                  /* plum */
+  --swatch-ink:  #7A2F65;                  /* 7.71 page, 8.53 card */
+  --swatch-soft: rgba(178, 74, 148, 0.14); /* plum on it 6.45 page, 7.08 card */
+  --swatch-on:   #FFFFFF;                  /* 8.67 */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background:   var(--background);
+  --color-card:         var(--card);
+  --color-surface:      var(--surface);
+  --color-foreground:   var(--foreground);
+  --color-muted:        var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-accent:       var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft:  var(--accent-soft);
+  --color-line:         var(--border);        /* `border-line`; `--color-border` would mint `border-border` */
+  --color-line-strong:  var(--border-strong);
+  --color-swatch:       var(--swatch);
+  --color-swatch-ink:   var(--swatch-ink);
+  --color-swatch-soft:  var(--swatch-soft);
+  --color-swatch-on:    var(--swatch-on);
+
+  /* Overriding Tailwind's own three names means font-sans / font-serif /
+     font-mono utilities and the default body font all resolve to ours.      */
+  --font-sans:  var(--font-inter), var(--font-sans-fallback);
+  --font-serif: var(--font-newsreader), var(--font-serif-fallback);
+  --font-mono:  var(--font-geist-mono), var(--font-mono-fallback);
+
+  --radius-xs: var(--radius);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base ---------------------------------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; }
 body {
-  background: var(--background);
+  font-family: var(--font-inter), var(--font-sans-fallback);
+  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);   /* 17px to 18px */
+  line-height: 1.6;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;   /* no faux bold or italic: a missing weight should look missing */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+h1, h2, .display {
+  font-family: var(--font-newsreader), var(--font-serif-fallback);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums;   /* 4,000 sits on the baseline next to caps */
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem); }        /* 36 to 56px */
+h2 { font-size: clamp(1.625rem, 1.25rem + 1.5vw, 2.125rem); }  /* 26 to 34px */
+h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; }
+h1 em, h2 em, .display em {
+  font-family: var(--font-newsreader-italic), var(--font-serif-fallback);
+  font-style: italic;
+  font-weight: 400;
+}
+.eyebrow {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+small, .meta, figcaption { font-size: 0.875rem; }   /* 14px is the floor; nothing smaller exists */
+.tnum { font-variant-numeric: tabular-nums lining-nums; }
+
+/* Unlayered on purpose. @import "tailwindcss" puts utilities in @layer, and
+   unlayered CSS beats layered CSS regardless of specificity, so no className
+   can remove this ring.                                                       */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius); }
+
+.skip-link {
+  position: absolute; left: 1rem; top: -100%; z-index: 50;
+  background: var(--accent); color: #FFFFFF;
+  padding: 0.5rem 1rem; border-radius: 9999px;
+}
+.skip-link:focus { top: 1rem; }
+
+::selection { background: var(--accent-soft); color: var(--foreground); }
+
+@media (pointer: coarse) { nav a, footer a, .pill { min-height: 2.75rem; } }
+
+/* Prose --------------------------------------------------------------------- */
+.prose { max-width: var(--measure); }
+.prose p, .prose ul, .prose ol, .prose blockquote { margin-block: 0 1.25em; }
+.prose ul { list-style: disc; padding-left: 1.25em; }
+.prose ol { list-style: decimal; padding-left: 1.25em; }
+.prose li { margin-block: 0.35em; }
+.prose h2 { margin-block: 2.5rem 0.75rem; }
+.prose h3 { margin-block: 2rem 0.5rem; }
+.prose a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: color var(--dur-hover) var(--ease), text-decoration-color var(--dur-hover) var(--ease);
+}
+.prose a:hover { color: var(--accent); text-decoration-thickness: 2px; }
+.prose blockquote { border-left: 2px solid var(--border-strong); padding-left: 1.25rem; color: var(--muted-strong); }
+.prose .wide { max-width: min(100%, 80ch); }   /* code and figures may exceed the measure */
+
+code, kbd, pre { font-family: var(--font-geist-mono), var(--font-mono-fallback); font-variant-numeric: tabular-nums; }
+:not(pre) > code { font-size: 0.875em; background: var(--surface); padding: 0.1em 0.35em; border-radius: var(--radius); }
+pre {
+  font-size: 0.875rem; line-height: 1.55;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem; overflow-x: auto; margin-block: 0 1.5rem;
+}
+pre.shiki { background: var(--card) !important; }
+figure { margin-block: 2rem; }
+figcaption { color: var(--muted); margin-top: 0.5rem; }
+
+/* Callout for "what breaks if wrong". Ink on a swatch tint, no red.            */
+.callout {
+  border-left: 3px solid var(--swatch);
+  background: var(--swatch-soft);
+  padding: 0.75rem 1rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-block: 0 1.5rem;
+}
+.callout .eyebrow { color: var(--swatch-ink); }
+
+/* Swatch use inside a case study                                              */
+.swatch-rule  { border-top: 3px solid var(--swatch); }
+.swatch-pill  { background: var(--swatch-soft); color: var(--swatch-ink); }
+.swatch-panel { background: var(--swatch); color: var(--swatch-on); }
+[data-swatch='the-ninth-room'] .swatch-panel { border-top: 3px solid var(--nr-yellow); }
+[data-swatch='the-ninth-room'] mark { background: var(--nr-yellow); color: var(--foreground); }
+
+/* Pills                                                                       */
+.pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 2.75rem; padding: 0 1.25rem; border-radius: 9999px;
+  font-weight: 500; font-size: 0.9375rem; text-decoration: none;
+  transition: background-color var(--dur-hover) var(--ease), color var(--dur-hover) var(--ease), border-color var(--dur-hover) var(--ease);
+}
+.pill-primary { background: var(--accent); color: #FFFFFF; }
+.pill-primary:hover { background: var(--accent-hover); }
+.pill-secondary { background: var(--card); color: var(--foreground); border: 1px solid var(--border-strong); }
+.pill-secondary:hover { border-color: var(--foreground); }
+
+/* Reveal: one 320ms rise for case study figures. The hidden state applies
+   only after the observer is running, so no JS means everything is visible. */
+[data-reveal] { transition: opacity var(--dur-reveal) var(--ease-enter), transform var(--dur-reveal) var(--ease-enter); }
+[data-reveal-ready] [data-reveal]:not([data-shown]) { opacity: 0; transform: translateY(8px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  [data-reveal-ready] [data-reveal]:not([data-shown]) { opacity: 1; transform: none; }
+}
+
+/* Print: a separate document palette, measured against paper. Ink #111111
+   rather than #1C1A17 so toner reads as black; every fill is dropped so the
+   page costs no colour ink.                                                   */
+@page { size: letter; margin: 0.6in 0.75in; }
+@media print {
+  html { font-size: 10.5pt; }
+  body { background: #FFFFFF; color: #111111; line-height: 1.4; min-height: 0; }
+  [data-print-hide], .skip-link, header nav, footer { display: none !important; }
+  main, .resume { max-width: none; padding: 0; margin: 0; }
+  .resume a { color: inherit; text-decoration: none; }
+  .prose a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8.5pt; color: #444444; }
+  h1, h2, h3 { break-after: avoid; }
+  .role, li, figure { break-inside: avoid; }
+  p, li { orphans: 3; widows: 3; }
+  .pill, .callout, .swatch-pill, .swatch-panel, [data-swatch] * { background: none !important; }
+  .swatch-rule, .callout, hr { border-color: #999999; }
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
 }

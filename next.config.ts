@@ -1,7 +1,29 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
+import createMDX from '@next/mdx'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // MDX files are pages and content; typed routes turn a mistyped href into a
+  // type error, which is the mistake a beginner makes most.
+  pageExtensions: ['ts', 'tsx', 'mdx'],
+  typedRoutes: true,
+  poweredByHeader: false,
+  images: { formats: ['image/avif', 'image/webp'], qualities: [60, 75] },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+    ]
+  },
+}
 
-export default nextConfig;
+// No remark or rehype plugins. Under Turbopack a plugin must be passed as a
+// string name (node_modules/next/dist/docs/01-app/02-guides/mdx.md, "Using
+// Plugins with Turbopack"); nothing here needs one. Code highlighting is a
+// server component, not a plugin, so its colours stay under the contrast gate.
+export default createMDX({})(nextConfig)

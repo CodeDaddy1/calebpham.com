@@ -1,0 +1,6 @@
+{
+  "note": "floorBytes is the gzipped client JS on / with no site code (Phase 0, 2026-09-11: React 19, Next 16 runtime, Vercel Analytics). The budget is floor plus allowance. Re-record the floor only when the framework changes.",
+  "floorBytes": 178381,
+  "allowanceBytes": 12288,
+  "cssMaxBytes": 12288
+}
