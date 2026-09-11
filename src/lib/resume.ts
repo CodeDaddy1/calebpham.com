@@ -105,7 +105,10 @@ export const RESUME: Resume = {
       bullets: [],
     },
   ],
-  education: [],
+  education: [
+    { school: 'University of Houston', program: 'BS Computer Science', start: '2024-08', end: null, note: 'Expected 2027' },
+    { school: 'Lone Star College', program: 'AS Accounting', start: '2024-01', end: '2026-05' },
+  ],
   skills: [
     { label: 'Languages and Frameworks', items: ['TypeScript', 'React', 'Next.js (App Router, Turbopack)', 'Node', 'Tailwind CSS'] },
     { label: 'Data and Infrastructure', items: ['Supabase Postgres', 'Vercel runtime', 'BI reporting'] },
