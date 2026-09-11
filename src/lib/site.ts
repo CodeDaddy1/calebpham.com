@@ -8,21 +8,28 @@
 //
 // NEXT_PUBLIC_SITE_URL wins because a preview deployment may want to describe
 // itself. VERCEL_PROJECT_PRODUCTION_URL is the stable production hostname
-// (unlike VERCEL_URL, which changes per deployment). The fallback is the apex.
+// (unlike VERCEL_URL, which changes per deployment); once the custom domain is
+// attached it is the apex. The fallback is the apex.
 
 const FALLBACK = 'https://calebpham.com'
 
-function resolve(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+/** The variables the resolver reads, so a test can hand it explicit inputs. */
+export interface SiteUrlEnv {
+  NEXT_PUBLIC_SITE_URL?: string
+  VERCEL_PROJECT_PRODUCTION_URL?: string
+}
+
+export function resolveSiteUrl(env: SiteUrlEnv): string {
+  const explicit = env.NEXT_PUBLIC_SITE_URL?.trim()
   if (explicit) return explicit.replace(/\/$/, '')
 
-  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+  const vercel = env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
   if (vercel) return `https://${vercel.replace(/\/$/, '')}`
 
   return FALLBACK
 }
 
-export const SITE_URL = resolve()
+export const SITE_URL = resolveSiteUrl(process.env)
 
 /** An absolute URL for a path on this site. */
 export function absoluteUrl(path: string): string {
