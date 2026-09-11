@@ -304,6 +304,7 @@ figcaption { color: var(--muted); margin-top: 0.5rem; }
   .resume li { margin-block: 0.05rem; }
   .resume header p { margin-top: 0.15rem; }
   .resume a { color: inherit; text-decoration: none; }
+  .resume-contact a { display: inline; min-height: 0; }   /* the 44px screen target adds no print height */
   .prose a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8.5pt; color: #444444; }
   h1, h2, h3 { break-after: avoid; }
   .role, li, figure { break-inside: avoid; }

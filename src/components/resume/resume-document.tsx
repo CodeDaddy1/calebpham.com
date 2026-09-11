@@ -19,11 +19,13 @@ export function ResumeDocument({ resume }: { resume: Resume }) {
       <header>
         <h1 className="text-[2.25rem]">{resume.name}</h1>
         <p className="mt-1 text-[1.125rem] text-muted-strong">{resume.headline}</p>
-        <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+        <p className="resume-contact mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
           <span>{resume.location}</span>
-          <a href={`mailto:${resume.email}`}>{resume.email}</a>
+          <a href={`mailto:${resume.email}`} className="inline-flex min-h-11 items-center">
+            {resume.email}
+          </a>
           {resume.links.map((l) => (
-            <a key={l.href} href={l.href} rel="noopener">
+            <a key={l.href} href={l.href} rel="noopener" className="inline-flex min-h-11 items-center">
               {l.label}
             </a>
           ))}
