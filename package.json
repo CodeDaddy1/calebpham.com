@@ -10,7 +10,7 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "resume:pdf": "node scripts/build-resume-pdf.ts",
+    "resume:pdf": "node scripts/build-resume-pdf.mts",
     "icons": "node scripts/generate-icons.mjs",
     "measure:js": "node scripts/measure-js.mjs",
     "check": "npm run typecheck && npm run lint && npm run build"
@@ -46,5 +46,6 @@
   "license": "MIT",
   "engines": {
     "node": ">=24 <25"
-  }
+  },
+  "type": "module"
 }
