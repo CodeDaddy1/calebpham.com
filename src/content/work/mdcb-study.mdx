@@ -1,0 +1,104 @@
+## What it is
+
+A study application for the Medical Dosimetry Certification Board exam, built for one student: me. Upload the course handouts and answer keys, and it produces multiple-choice questions where every option carries a rationale and every question cites the passage it came from. It is a small repository, five commits over two days in June 2026, and the interesting part is the rule it enforces.
+
+## The grounding rule
+
+Only verified questions are ever served. A question is drafted by one model from retrieved source chunks, then a second, cheaper model is asked one thing: is the proposed answer fully supported by the cited chunks? If not, the question is never written as verified, and the quiz page reads only verified rows. Two runtime agents exist, a Source Expert that ingests, retrieves, and verifies, and a Quiz Generator that drafts; everything else, scores, streaks, the calendar, is plain SQL.
+
+Retrieval is a vector search in Postgres. Chunks carry a 1,024-dimension embedding, and one SQL function returns the nearest chunks for a query inside one deck.
+
+<CodeQuote file="supabase/migrations/0003_match_chunks.sql" lines="8 to 34" href="https://github.com/CodeDaddy1/MDCB_Study/blob/999b0b7e7a27bf9e5d5169016a036d755ec9a3d6/supabase/migrations/0003_match_chunks.sql#L8-L34">
+
+```sql
+create or replace function match_chunks(
+  p_deck_id uuid,
+  p_query_embedding vector(1024),
+  p_match_count int default 8
+)
+returns table (
+  id uuid,
+  content text,
+  source_loc jsonb,
+  similarity float
+)
+language sql
+stable
+set search_path = public
+as $$
+  select
+    c.id,
+    c.content,
+    c.source_loc,
+    1 - (c.embedding <=> p_query_embedding) as similarity
+  from chunks c
+  where c.deck_id = p_deck_id
+    and c.embedding is not null
+  order by c.embedding <=> p_query_embedding
+  limit greatest(p_match_count, 1);
+$$;
+```
+
+</CodeQuote>
+
+**Decision.** Retrieval is a database function, not application code, and it runs as the caller: row-level security on the chunks table still applies to whoever asks. The function is scoped to one deck, orders by cosine distance over an HNSW index, and clamps the requested count to at least one.
+
+**Measurement.** Cosine similarity is returned as one minus the distance the index orders by, so the same expression drives both the ordering and the number the caller sees. Eight chunks per query is the default; the generator passes the same eight into the draft as numbered context so the model can cite chunk numbers rather than paraphrase.
+
+**What breaks if wrong.** A question grounded in another deck's material, or a search that ignores the index and scans every chunk. Both are silent: the quiz still renders.
+
+<CodeQuote file="lib/agents/expert.ts" lines="282 to 320" href="https://github.com/CodeDaddy1/MDCB_Study/blob/999b0b7e7a27bf9e5d5169016a036d755ec9a3d6/lib/agents/expert.ts#L282-L320">
+
+```ts
+export async function verify(input: VerifyInput): Promise<VerifyResult> {
+  if (input.chunkIds.length === 0) {
+    return {
+      supported: false,
+      supportingChunkId: null,
+      reason: 'No source chunks were cited.',
+    }
+  }
+
+  const admin = createAdminClient()
+  const { data: chunks } = await admin
+    .from('chunks')
+    .select('id, content')
+    .in('id', input.chunkIds)
+  if (!chunks || chunks.length === 0) {
+    return {
+      supported: false,
+      supportingChunkId: null,
+      reason: 'Cited source chunks were not found.',
+    }
+  }
+
+  const cited = chunks
+    .map((c) => `[chunk ${c.id}]\n${c.content}`)
+    .join('\n\n---\n\n')
+
+  const anthropic = getAnthropic()
+  const response = await anthropic.messages.parse({
+    model: MODELS.VERIFICATION,
+    max_tokens: 1024,
+    system: VERIFY_SYSTEM,
+    messages: [
+      {
+        role: 'user',
+        content: `CITED SOURCE CHUNKS:\n\n${cited}\n\nQUESTION PROMPT:\n${input.prompt}\n\nPROPOSED ANSWER:\n${input.answer}\n\nIs the proposed answer fully supported by the cited chunks?`,
+      },
+    ],
+    output_config: { format: zodOutputFormat(verifySchema) },
+  })
+```
+
+</CodeQuote>
+
+**Decision.** The verifier sees only the cited chunks, the prompt, and the proposed answer, never the drafting model's reasoning, and it must answer in a fixed shape (supported, which chunk, why). A question with no citations fails before any model is called.
+
+**Measurement.** Verification runs on a smaller model than drafting, so the check costs a fraction of the draft. The structured output is parsed against a schema, and a response that does not parse is treated as unsupported rather than as an error to retry past.
+
+**What breaks if wrong.** A confident, well-written question whose answer is not in the source. On a board exam that is the most expensive kind of wrong, because it teaches the mistake with a rationale attached.
+
+## What it taught me
+
+The same rule that makes a report trustworthy makes a study aid trustworthy: nothing is shown that cannot be traced to its source. Drafting with one model and checking with another was the cheapest way to make that rule hold.
