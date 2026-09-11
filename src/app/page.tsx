@@ -32,8 +32,8 @@ export default function HomePage() {
                 Read the {projects[0].name} case study
               </Link>
             )}
-            <a href={SITE.linkedin} rel="noopener" className="pill pill-secondary">
-              LinkedIn
+            <a href="/Caleb-Pham-Resume.pdf" download className="pill pill-secondary">
+              Resume (PDF)
             </a>
           </p>
         </Container>
