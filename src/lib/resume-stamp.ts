@@ -1,7 +1,7 @@
 // The fingerprint of everything the resume PDF depends on.
 //
 // Concept: content hashing as a staleness check. The PDF is a rendering of
-// three inputs; hash the inputs at generation time, and a test can tell you
+// four inputs; hash the inputs at generation time, and a test can tell you
 // the rendering is stale without opening it. Git cannot tell the two apart.
 
 import { createHash } from 'node:crypto'
@@ -20,6 +20,8 @@ export function resumeStamp(): string {
   return createHash('sha256')
     .update(readFileSync(`${ROOT}src/lib/resume.ts`, 'utf-8'))
     .update(readFileSync(`${ROOT}src/components/resume/resume-document.tsx`, 'utf-8'))
+    // The face the PDF is set in. A font change reflows every line.
+    .update(readFileSync(`${ROOT}src/app/fonts.ts`, 'utf-8'))
     .update(printBlock())
     .digest('hex')
 }

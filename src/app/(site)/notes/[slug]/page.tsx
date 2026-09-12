@@ -35,7 +35,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
     <Container className="py-14 sm:py-20">
       <article className="mx-auto max-w-[720px]">
         <header>
-          <p className="eyebrow">Note</p>
+          <p className="label">Note</p>
           <h1 className="mt-3">{n.title}</h1>
           <p className="mt-4 text-[1.125rem] text-muted-strong">{n.summary}</p>
           <p className="mt-3 text-sm text-muted tnum">
@@ -46,8 +46,8 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
           <Body />
         </div>
         <p className="mt-16 border-t border-line pt-6">
-          <Link href="/notes" className="text-accent underline underline-offset-4">
-            All notes
+          <Link href="/notes" className="label nav-link">
+            All notes <span aria-hidden="true">→</span>
           </Link>
         </p>
       </article>

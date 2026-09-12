@@ -1,0 +1,130 @@
+/* The home page only: imported by src/app/(home)/page.tsx, so none of this
+   ships on an inner page. The design's effects live here by rule name and
+   globals.palette.test.ts holds them to these rules: the glass panel's blur,
+   the chapter-2 stage filter, and the scrim's gradient. Nothing else on the
+   site blurs, glows, or paints a gradient.                                   */
+
+#cinema { position: relative; }
+
+/* Stage: a poster under two video elements under the scrim, fixed behind
+   every chapter. Two videos so the next clip buffers while the live one
+   fades; the black gap is the design's 600ms, never the network.           */
+.stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--background); }
+.stage-poster, .stage-video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: opacity var(--dur-stage) var(--ease), filter 1s var(--ease);
+}
+.stage-video { opacity: 0; }
+#cinema[data-live='a'] [data-role='a'], #cinema[data-live='b'] [data-role='b'] { opacity: 1; }
+#cinema[data-dip] .stage-poster { opacity: 0; }
+#cinema[data-chapter='2'] :is(.stage-poster, .stage-video) { filter: blur(4px) brightness(0.8) saturate(0.7); }
+
+/* The scrim's three stops are registered properties so they animate; a
+   transition on a gradient background animates nothing in any browser.     */
+@property --s0 { syntax: '<number>'; inherits: false; initial-value: 0.2; }
+@property --s1 { syntax: '<number>'; inherits: false; initial-value: 0.35; }
+@property --s2 { syntax: '<number>'; inherits: false; initial-value: 0.9; }
+.scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  --s0: 0.2; --s1: 0.35; --s2: 0.9;
+  background: linear-gradient(90deg, rgba(0, 0, 0, var(--s0)) 0%, rgba(0, 0, 0, var(--s1)) 40%, rgba(0, 0, 0, var(--s2)) 100%);
+  transition: --s0 1s var(--ease), --s1 1s var(--ease), --s2 1s var(--ease);
+}
+/* The Desk clip is a bright office; its whole length measures 4.2 to 4.5
+   under the board's stops, so that chapter deepens the 40 percent stop
+   alone (src/lib/home.assets.test.ts measures each chapter's frame under
+   its own stops). */
+#cinema[data-chapter='1'] .scrim { --s1: 0.45; }
+#cinema[data-chapter='2'] .scrim { --s0: 0.45; --s1: 0.6; --s2: 0.95; }
+
+/* Chapters: a two-column grid whose right column holds the text, 640px wide. */
+.chapter {
+  position: relative; z-index: 1;
+  min-height: 100vh; min-height: 100svh;
+  display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, auto); align-items: center;
+  padding: 80px max(28px, env(safe-area-inset-right)) 80px max(28px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  scroll-margin-top: calc(var(--header-h) + 1rem);
+}
+.chapter-hero { align-items: end; padding-top: 120px; padding-bottom: 120px; }
+.chapter-contact { min-height: 70vh; min-height: 70svh; align-items: end; padding-bottom: 40px; }
+.chapter-column { grid-column: 2; width: min(100%, 640px); justify-self: end; }
+.chapter h2 { font-size: clamp(2rem, 1.25rem + 2.6vw, 3.75rem); line-height: 1; }
+.hero-in { animation: fade 0.9s both; }   /* no delay: the headline is the largest paint, and a delay is LCP */
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.rule-eyebrow { display: flex; align-items: center; gap: 12px; }
+.rule-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--foreground); flex: none; }
+.lede { max-width: 46ch; color: var(--muted-strong); font-size: 1.0625rem; }
+.chapter-p { margin-top: 20px; color: var(--muted-strong); }
+
+/* Stat tiles: 2 by 2 at every width, divided by hairlines, never a fill
+   (a lighter fill inside the glass drops --muted-strong under the floor).  */
+.stats { margin-top: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--border-strong); }
+.stat { padding: 22px 0 24px; border-bottom: 1px solid var(--border); }
+.stat:nth-child(odd) { border-right: 1px solid var(--border); padding-right: 20px; }
+.stat:nth-child(even) { padding-left: 20px; }
+.stat .label { color: var(--muted); }
+.stat-value {
+  margin-top: 12px;
+  font-size: clamp(1.75rem, 1rem + 3vw, 4rem);
+  font-weight: 400; line-height: 0.9; letter-spacing: -0.04em; font-stretch: 80%;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The Desk statement: words hold --word-unlit until the reader reaches
+   them, only once JavaScript has armed the paragraph. No JS and reduced
+   motion never arm it, so every word is --foreground from the first paint. */
+.statement {
+  margin-top: 20px;
+  font-size: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+  font-weight: 500; line-height: 1.05; letter-spacing: -0.025em; font-stretch: 88%;
+  text-wrap: balance;
+}
+.sw { transition: color 0.25s var(--ease); }
+[data-statement-ready] .sw:not([data-lit]) { color: var(--word-unlit); }
+
+/* The Code chapter's column is the glass panel. --muted is re-scoped to the
+   stronger grey because #8A8A8A measures 2.37 on the glass over a white
+   frame; the contrast test pins this line.                                 */
+.glass {
+  padding: 40px clamp(24px, 3vw, 44px);
+  background: var(--glass);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-left: 1px solid var(--border);
+  --muted: var(--muted-strong);
+}
+.projects { margin: 40px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border-strong); }
+.projects li { margin: 0; }
+
+/* Contact */
+.display-contact { margin-top: 32px; font-size: clamp(3.5rem, 8vw, 7.5rem); font-weight: 500; line-height: 0.9; letter-spacing: -0.04em; font-stretch: 84%; }
+.contact-links { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 28px; }
+.contact-links a { display: inline-flex; align-items: center; min-height: 2.75rem; text-decoration: none; color: var(--muted-strong); transition: color var(--dur-hover) var(--ease); }
+.contact-links a:hover { color: var(--foreground); }
+.contact-links a.primary { color: var(--foreground); border-bottom: 1px solid var(--foreground); }
+.colophon { margin-top: 48px; color: var(--muted); }
+
+/* Chapter rail: fixed bottom-left above 760px, a bar under the header
+   below. Inactive rows use --muted (5.70 on the ground) rather than the
+   board's opacity, so the label stays readable and measurable.            */
+.rail { position: fixed; left: max(28px, env(safe-area-inset-left)); bottom: max(32px, env(safe-area-inset-bottom)); z-index: 20; display: flex; flex-direction: column; }
+.rail a { display: flex; align-items: center; gap: 14px; min-height: 2.75rem; text-decoration: none; color: var(--muted); transition: color 0.4s var(--ease); }
+.rail a::before { content: ''; display: block; height: 1px; width: 14px; background: currentColor; transition: width 0.6s var(--ease-rise); }
+.rail a[aria-current='true'] { color: var(--foreground); }
+.rail a[aria-current='true']::before { width: 36px; }
+.rail a:hover { color: var(--foreground); }
+.rail-label { color: inherit; }
+
+@media (max-width: 759px) {
+  .rail {
+    left: 0; right: 0; bottom: auto; top: var(--header-h);
+    flex-direction: row; justify-content: space-between; align-items: center;
+    height: 2.75rem; padding: 0 28px;
+    background: var(--background); border-bottom: 1px solid var(--border);
+  }
+  .rail a { min-width: 2.75rem; }
+  .rail-label { display: none; }
+  .chapter { grid-template-columns: minmax(0, 1fr); padding-top: 140px; }
+  .chapter-column { grid-column: 1; width: 100%; }
+  .scrim { background: linear-gradient(180deg, rgba(0, 0, 0, var(--s0)) 0%, rgba(0, 0, 0, var(--s1)) 35%, rgba(0, 0, 0, var(--s2)) 100%); }
+}

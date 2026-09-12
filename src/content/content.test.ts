@@ -91,4 +91,20 @@ describe.each(publishedProjects().map((p) => p.slug))('case study %s', (slug) =>
       expect(alt.toLowerCase(), 'alt must say what the screen shows').not.toMatch(/^screenshot$/)
     }
   })
+
+  // A <Paired> block puts one excerpt beside the demo screen it drives. The
+  // three labels stay outside it, after the block, where the reader reads
+  // them under both columns.
+  it('pairs one excerpt with one captioned figure, labels after the pair', () => {
+    for (const m of src.matchAll(/<Paired\b[^>]*>([\s\S]*?)<\/Paired>/g)) {
+      const inner = m[1]
+      expect((inner.match(/<CodeQuote\b/g) ?? []).length, 'one excerpt per Paired').toBe(1)
+      expect((inner.match(/<Figure\b/g) ?? []).length, 'one figure per Paired').toBe(1)
+      expect(inner.indexOf('<CodeQuote'), 'excerpt before figure').toBeLessThan(inner.indexOf('<Figure'))
+      expect(inner).not.toMatch(/\*\*(Decision|Measurement|What breaks if wrong)\.\*\*/)
+      const caption = inner.match(/<Figure\b[^>]*caption="([^"]*)"/)?.[1] ?? ''
+      expect(caption.trim().length, 'a paired figure names the surface it shows').toBeGreaterThanOrEqual(20)
+    }
+    expect((src.match(/<Paired\b/g) ?? []).length, 'every Paired is closed').toBe((src.match(/<\/Paired>/g) ?? []).length)
+  })
 })

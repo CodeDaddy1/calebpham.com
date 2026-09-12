@@ -9,12 +9,25 @@
 // public, and the routes come from the sitemap plus the 404 page.
 //
 //   npx tsx scripts/audit-contrast.ts [--url=http://localhost:3000] [--widths=390,1280]
+//                                     [--base=#0B0B0B] [--hide-stage=true] [--motion=reduce]
+//
+// --base is the page ground every transparent stack composites onto (the
+// --background token). --hide-stage hides the home page's fixed video layer
+// (`[data-stage]`) so text there is measured on the ground it is served over
+// when the video is absent; text over footage is measured by
+// src/lib/home.assets.test.ts against the real poster frames, because a
+// fixed sibling layer is invisible to an ancestor walk. --motion=no-preference
+// mounts the video and waits for `load` (a looping video never idles).
 
 import { chromium, type Page } from 'playwright'
 
 const arg = (f: string) => process.argv.find((a) => a.startsWith(`--${f}=`))?.split('=').slice(1).join('=')
 const BASE = (arg('url') ?? 'http://localhost:3000').replace(/\/$/, '')
 const WIDTHS = (arg('widths') ?? '390,1280').split(',').map(Number)
+const GROUND = arg('base') ?? '#0B0B0B'
+const HIDE_STAGE = (arg('hide-stage') ?? 'true') !== 'false'
+const MOTION = (arg('motion') ?? 'reduce') as 'reduce' | 'no-preference'
+const GROUND_RGB = [1, 3, 5].map((i) => parseInt(GROUND.slice(i, i + 2), 16))
 
 async function routesFromSitemap(): Promise<string[]> {
   const xml = await (await fetch(`${BASE}/sitemap.xml`)).text()
@@ -29,6 +42,7 @@ async function routesFromSitemap(): Promise<string[]> {
  * hidden by an ancestor's opacity or display (skipped by walking up).
  */
 const PROBE = `() => {
+  const BASE_RGB = ${JSON.stringify(GROUND_RGB)}
   const lum = ([r,g,b]) => {
     const f = c => { const s = c/255; return s <= 0.04045 ? s/12.92 : ((s+0.055)/1.055)**2.4 }
     return 0.2126*f(r) + 0.7152*f(g) + 0.0722*f(b)
@@ -55,7 +69,7 @@ const PROBE = `() => {
       if (c && c.a > 0) { stack.push(c); if (c.a === 1) break }
       n = n.parentElement
     }
-    let base = [246,241,232]
+    let base = BASE_RGB
     for (let i = stack.length - 1; i >= 0; i--) {
       const c = stack[i]
       base = c.rgb.map((v,j) => Math.round(v*c.a + base[j]*(1-c.a)))
@@ -92,8 +106,9 @@ const PROBE = `() => {
 type Failure = { txt: string; px: number; cr: number; need: number; tag: string; color: string }
 
 async function auditRoute(page: Page, route: string): Promise<Failure[]> {
-  await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle', timeout: 45000 })
-  await page.waitForTimeout(300)
+  await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 45000 })
+  if (HIDE_STAGE) await page.addStyleTag({ content: '[data-stage] { display: none !important }' })
+  await page.waitForTimeout(400)
   return page.evaluate(`(${PROBE})()`) as Promise<Failure[]>
 }
 
@@ -102,9 +117,9 @@ async function main() {
   const browser = await chromium.launch()
   let total = 0
   for (const width of WIDTHS) {
-    const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' })
+    const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: MOTION })
     const page = await context.newPage()
-    console.log(`\n== ${width}px`)
+    console.log(`\n== ${width}px (base ${GROUND}, stage ${HIDE_STAGE ? 'hidden' : 'shown'}, motion ${MOTION})`)
     for (const route of routes) {
       const fails = await auditRoute(page, route)
       total += fails.length

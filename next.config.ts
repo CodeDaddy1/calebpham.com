@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
         ],
       },
+      {
+        // The chapter clips and posters are content-addressed by name: a
+        // re-encode changes the filename, never the bytes behind a URL, so
+        // the browser may keep them for a year.
+        source: '/video/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
     ]
   },
 }

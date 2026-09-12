@@ -2,7 +2,7 @@
 //
 // Run with:  npm run icons
 //
-// Port of LumaIQ's script. The mark is two rust bars forming a corner, the
+// Port of LumaIQ's script. The mark is two light bars forming a corner, the
 // same shape the OG card draws in src/lib/og-image.tsx. Every output is built
 // by scaling one SVG, so a size can be added without a hand-pasted raster.
 //
@@ -17,8 +17,8 @@ import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
-const PAPER = '#F6F1E8' // --background
-const RUST = '#9F4716' // --accent
+const GROUND = '#0B0B0B' // --background
+const MARK = '#EDEDED' // --accent
 
 // The mark in its own 56-unit space: a 44 by 12 bar over a 12 by 44 bar,
 // sharing the top-left corner. Its ink spans x 6 to 50, y 6 to 50.
@@ -37,10 +37,10 @@ function iconSvg(size) {
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img">
   <title>Caleb Pham</title>
-  <rect width="${size}" height="${size}" fill="${PAPER}"/>
+  <rect width="${size}" height="${size}" fill="${GROUND}"/>
   <svg x="${round(x)}" y="${round(y)}" width="${round(w)}" height="${round(h)}" viewBox="${MARK_VIEWBOX.x} ${MARK_VIEWBOX.y} ${MARK_VIEWBOX.w} ${MARK_VIEWBOX.h}" preserveAspectRatio="xMidYMid meet">
-    <rect x="6" y="6" width="44" height="12" rx="2" fill="${RUST}"/>
-    <rect x="6" y="6" width="12" height="44" rx="2" fill="${RUST}"/>
+    <rect x="6" y="6" width="44" height="12" rx="2" fill="${MARK}"/>
+    <rect x="6" y="6" width="12" height="44" rx="2" fill="${MARK}"/>
   </svg>
 </svg>
 `

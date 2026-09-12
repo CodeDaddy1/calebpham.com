@@ -27,3 +27,7 @@ next-env.d.ts
 
 # agent worktrees are whole checkouts of this repo
 .claude/worktrees/
+
+# Local scratch: encode intermediates, screenshots, demo captures
+/tmp/
+/.captures/
