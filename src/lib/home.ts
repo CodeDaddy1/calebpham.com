@@ -4,9 +4,9 @@
 // and so the copy can change without touching a component.
 //
 // Every factual sentence below is either on the verified list (resume, bio,
-// case studies) or is Caleb's own board copy in its fallback form; the
-// preferred lines he has not yet signed are listed in the plan and in the
-// PR description, not here.
+// case studies) or is Caleb's own board copy. Rows 6 (the city paragraph)
+// and 19 (the contact paragraph) are his original lines, signed off on
+// 2026-09-12; the other flagged rows ship in their fallback wording.
 
 export type ChapterId = 'city' | 'desk' | 'code'
 
@@ -71,13 +71,13 @@ export const HOME_COPY = {
   lede: 'Seven properties, 4,000 units, and a month-end that lived in spreadsheets. LumaIQ is what I built to replace them: sole engineer, first commit to production.',
   cityLabel: '01 · The City',
   cityH2: 'Where I ran it.',
-  cityP: 'Houston Area Manager for The Jenkins Organization: seven properties, a team of 14, occupancy held at 87 to 92 percent. This is where the software started, and Houston is still where I live.',
+  cityP: 'Area manager for The Jenkins Organization, accountable for occupancy, delinquency, and the month-end close at every store. This is where the software started, and it is still where I live.',
   deskLabel: '02 · The Desk',
   statement: 'I have closed the month at seven stores and sent the owner reports myself. I build for the person doing that job.',
   codeLabel: '03 · The Code',
   codeH2: 'Then I wrote the software the desk was missing.',
   codeP: 'LumaIQ, built alone from concept through production: Next.js and TypeScript on Vercel, Postgres with row-level security as the boundary, and 2,453 tests that run on every push and fail the build when a rule is broken. The desk decided what to build. The code is how it holds.',
   projectCta: 'Case study',
-  contactP: 'I also take on a small number of advisory and build engagements for self-storage operators. If you run storage in Houston, write to me.',
+  contactP: 'I take a small number of advisory and build engagements for self-storage operators, starting with the ones in my own city. If you are in Houston, I will come to the property.',
   contactH2: 'Write to me.',
 } as const
