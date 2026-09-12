@@ -6,7 +6,7 @@ import { RESUME } from '@/lib/resume'
 export const metadata: Metadata = {
   title: 'Resume',
   description:
-    'The resume of Caleb Pham: Founding Software Engineer at LumaIQ after running seven self-storage properties in Houston. One Letter page, real text, as a PDF.',
+    'The resume of Caleb Pham: Founding Software Engineer at LumaIQ after managing six self-storage properties in two Texas markets. One Letter page, real text, as a PDF.',
   alternates: { canonical: '/resume' },
   openGraph: { url: '/resume' },
 }

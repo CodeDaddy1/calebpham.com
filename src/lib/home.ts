@@ -1,12 +1,14 @@
 // The home page as typed data: the three chapters, the stat tiles, the desk
 // rows, and every string the cinema says. Prose lives here rather than in
-// the components so src/content/diction.test.ts scans it as string literals
+// the components so src/content/diction.test.ts and length.test.ts scan it,
 // and so the copy can change without touching a component.
 //
-// Every factual sentence below is either on the verified list (resume, bio,
-// case studies) or is Caleb's own board copy. Rows 6 (the city paragraph)
-// and 19 (the contact paragraph) are his original lines, signed off on
-// 2026-09-12; the other flagged rows ship in their fallback wording.
+// Every fact below comes from Caleb's own account on 2026-09-12 (the plan's
+// interview record) or from a repository measurement. The management
+// figures he allows are six properties, two Texas markets, roughly 3,000
+// units and roughly 350,000 square feet; src/content/facts.test.ts refuses
+// the ones he retired. Rows 6 (cityP) and 19 (contactP) of the earlier copy
+// table are his own lines; cityP now names both markets at his correction.
 
 export type ChapterId = 'city' | 'desk' | 'code'
 
@@ -41,42 +43,47 @@ export interface Stat {
 }
 
 export const STATS: readonly Stat[] = [
-  { label: 'Properties', value: 7 },
-  { label: 'Units', value: 4000 },
-  { label: 'Occupancy held', range: [87, 92], suffix: '%' },
-  { label: 'Monthly revenue, roughly', value: 400000, prefix: '$' },
+  { label: 'Properties', value: 6 },
+  { label: 'Markets', value: 2 },
+  { label: 'Units, roughly', value: 3000 },
+  { label: 'Square feet, roughly', value: 350000 },
 ]
 
 export const DESK_ROWS = [
   {
     number: '01',
-    label: 'Operations',
-    text: 'Rate strategy, delinquency and lien, month-end close, owner reporting. I know which numbers an owner reads first and which ones a manager is afraid of.',
+    label: 'Revenue',
+    text: 'Rate strategy, existing-customer rate increases, occupancy and pricing across both markets.',
   },
   {
     number: '02',
-    label: 'Engineering',
-    text: 'Sole engineer on a multi-tenant product. Postgres with row-level security as the boundary, Next.js on Vercel, TypeScript throughout, and a suite that fails the build when a rule is broken.',
+    label: 'Risk',
+    text: 'Delinquency, lien compliance, auctions, audits and inspections.',
   },
   {
     number: '03',
-    label: 'Applied AI',
-    text: 'Anthropic and OpenAI models drive the document and decision workflows. In MDCB Study, every question cites the passage it came from.',
+    label: 'Reporting',
+    text: 'Month-end close, owner reports, and the BI the reviews ran on.',
+  },
+  {
+    number: '04',
+    label: 'People',
+    text: 'Store-team hiring, training, scheduling and coaching across both markets.',
   },
 ] as const
 
 export const HOME_COPY = {
   eyebrow: 'Founder and Software Engineer · Houston, Texas',
-  h1: 'I ran seven self-storage properties across Houston. Then I built the software they were missing.',
-  lede: 'Seven properties, 4,000 units, and a month-end that lived in spreadsheets. LumaIQ is what I built to replace them: sole engineer, first commit to production.',
+  h1: 'I was the bridge between six storage properties and the head of operations. Then I built it in software.',
+  lede: 'The store teams on one side, the home office on the other, and me carrying the numbers between them. LumaIQ is that job as software: sole engineer, first commit to production.',
   cityLabel: '01 · The City',
-  cityH2: 'Where I ran it.',
-  cityP: 'Area manager for The Jenkins Organization, accountable for occupancy, delinquency, and the month-end close at every store. This is where the software started, and it is still where I live.',
+  cityH2: 'Where I did the job.',
+  cityP: 'Area manager for The Jenkins Organization across the Houston market and the Temple and Killeen market, accountable for occupancy, delinquency, and the month-end close at every store. Houston is where the software started and where I still live.',
   deskLabel: '02 · The Desk',
-  statement: 'I have closed the month at seven stores and sent the owner reports myself. I build for the person doing that job.',
+  statement: 'I have closed the month at every store myself and sent the owner reports. I build for the person doing that job.',
   codeLabel: '03 · The Code',
   codeH2: 'Then I wrote the software the desk was missing.',
-  codeP: 'LumaIQ, built alone from concept through production: Next.js and TypeScript on Vercel, Postgres with row-level security as the boundary, and 2,453 tests that run on every push and fail the build when a rule is broken. The desk decided what to build. The code is how it holds.',
+  codeP: 'LumaIQ, built alone from concept through production: Next.js and TypeScript on Vercel, Postgres with row-level security as the boundary, 2,453 tests on every push. Anthropic and OpenAI models drive the document and decision workflows.',
   projectCta: 'Case study',
   contactP: 'I take a small number of advisory and build engagements for self-storage operators, starting with the ones in my own city. If you are in Houston, I will come to the property.',
   contactH2: 'Write to me.',

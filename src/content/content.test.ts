@@ -7,7 +7,8 @@
 // of a fixed commit, or ships a figure without a description.
 //
 // It also keeps the typed index and the MDX files in step: every published
-// slug has a file, and every file has an index entry.
+// slug has a file, and every file has an index entry. And it holds each case
+// study to proof first: one lead paragraph, then the sections.
 //
 // WHAT BREAKS IF THIS IS WRONG: a case study that reads as marketing instead
 // of evidence, which is the one thing this site must never do.
@@ -17,11 +18,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { PROJECTS, publishedProjects } from '@/lib/projects'
-import { NOTES, publishedNotes } from '@/lib/notes'
 
 const CONTENT = fileURLToPath(new URL('.', import.meta.url))
 const WORK = join(CONTENT, 'work')
-const NOTES_DIR = join(CONTENT, 'notes')
 
 const mdxFiles = (dir: string) => (existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.mdx')) : [])
 
@@ -33,15 +32,6 @@ describe('index and files agree', () => {
   it('every work MDX file has an index entry', () => {
     const slugs = new Set(PROJECTS.map((p) => p.slug as string))
     for (const f of mdxFiles(WORK)) expect(slugs.has(f.replace(/\.mdx$/, '')), f).toBe(true)
-  })
-
-  it('every published note has an MDX file', () => {
-    for (const n of publishedNotes()) expect(existsSync(join(NOTES_DIR, `${n.slug}.mdx`)), `${n.slug}.mdx`).toBe(true)
-  })
-
-  it('every note MDX file has an index entry', () => {
-    const slugs = new Set(NOTES.map((n) => n.slug))
-    for (const f of mdxFiles(NOTES_DIR)) expect(slugs.has(f.replace(/\.mdx$/, '')), f).toBe(true)
   })
 })
 

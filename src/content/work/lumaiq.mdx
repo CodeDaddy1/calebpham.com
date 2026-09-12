@@ -1,32 +1,6 @@
-## The problem from the floor
+Multi-tenant from the first migration, it reads the exports a company already produces, rent rolls, unit availability, owner PDFs and workbooks, and turns them into the calls a manager has to make.
 
-I was the Houston area manager for seven self-storage properties and 4,000 units before I wrote a line of this. Month-end meant the same work at every store: pull the storEDGE reports, retype the figures the management system leaves out, reconcile them in a spreadsheet, and send each owner a report that looked like every other month's. The questions the owners asked were good ones. The tools to answer them did not exist, so the answers lived in spreadsheets that stopped scaling long before anyone admitted it.
-
-LumaIQ is the tool I wanted then. I started it in April 2026 and have built it alone from concept through production.
-
-## What it is
-
-Asset management software for self-storage operators, sold to multiple tenant companies. It reads the exports an operator already produces and turns them into the decisions an operator actually has to make. The surfaces group under three outcomes:
-
-- **Grow revenue.** Rate Increases, Rate Board, Comp Reports, Market Map.
-- **Control cost and risk.** Delinquency and Lien, Accounting, Property Audits, Field Ops.
-- **Report the result.** Owner Reports, Budget and Pro Forma, Ranking Reports, Home.
-
-Every competitor rate a tenant records is typed or pasted by a person (demo tenants are seeded with generated filler). Nothing fetches a competitor's site, and adding that is not on the table.
-
-## How it is built
-
-Next.js 16 on the App Router, React 19, TypeScript, Tailwind CSS 4, deployed on Vercel. Postgres on Supabase holds every tenant, and row-level security is the boundary: every tenant table hangs off a company id (the platform, careers, and security-ledger tables sit outside the tenant model on purpose, with no company id at all), application code queries through the user's own session, and the service role is confined to server-side routes and actions, most of which explain themselves in a comment at the call site. The policies are migrations, and they ship through review like any other code.
-
-Owner reports come in as storEDGE PDFs and workbooks, get parsed into one metric model, and go back out as a generated workbook with the owner's email and a delivery ledger. Rate increases run on two storEDGE exports, the rent roll by tenant and the unit availability by group, because a tenant weighing a move-out is choosing against the units they could actually rent into.
-
-<Figure src="/work/lumaiq/02-rate-increases.webp" alt="LumaIQ Rate Increases, archived outcomes for the City Storage demo tenant: eight sent batches with proposed and kept dollars per property, churn after increase at 15.3 percent, 1,022 notices sent, and a calibration panel. Demo data." width={1600} height={1000} caption="Rate Increases, the outcomes tab: what past batches kept, not what they proposed. A move-out and a rolled-back increase both count as zero, which is the point of measuring here rather than at send. Demo tenant." />
-
-The suite is 2,453 tests in 176 files and runs on every push. Some of those tests walk the source tree and enforce architecture rather than behaviour: one fails any read of a large table that shows no explicit bound (paging, a range, a limit, a count, a single row, or a written reason), one measures every text-carrying colour token against the WCAG floor on both surfaces it can land on in both themes, one walks the public route directory so a new page cannot be left behind the sign-in wall.
-
-## Two pieces of it
-
-The characteristic failure in this product is a wrong number that raises no error. Two excerpts, each with the decision, the measurement behind it, and what breaks if it is wrong.
+## Every read is paged
 
 <Paired>
 
@@ -64,15 +38,17 @@ export async function pageAll<T>(build: () => Pageable): Promise<T[]> {
 
 </CodeQuote>
 
-<Figure src="/work/lumaiq/01-owner-reports.webp" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Owner Reports, the month-end desk this helper reads for: every row is a store, and the list is the whole portfolio rather than the first thousand rows a capped read would return. City Storage demo tenant, no client data." />
+<Figure src="/work/lumaiq/01-owner-reports.webp" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Owner Reports, the desk this helper reads for: the whole portfolio, not the first thousand rows. City Storage demo tenant, no client data." />
 
 </Paired>
 
-**Decision.** Every read of a table that can grow past a thousand rows goes through this helper, and the helper takes a function that builds a fresh query rather than a query. A PostgREST query builder is consumed when it is awaited, so passing the query itself would paginate one exhausted builder and return the first page forever.
+**Decision.** A read of a table that can pass a thousand rows is either explicitly bounded or goes through this helper, which takes a function that builds a fresh query, because a consumed PostgREST builder would return the first page forever.
 
-**Measurement.** PostgREST caps every select at 1,000 rows and returns a successful response when it truncates. It was first written for the rate-increase outcome history, exactly the kind of series that starts midway when a read is silently capped. The helper reads in pages of 1,000, stops on the first short page, refuses to go past 50,000 rows, and throws on the first error instead of returning a partial set. A test walks the source and fails any uncapped read of a watched table, so the rule is enforced rather than remembered.
+**Measurement.** Supabase's PostgREST caps a select at 1,000 rows by default and answers success when it truncates. The helper pages by 1,000, stops on the first short page, refuses to pass 50,000 rows, and a test fails any uncapped read of a watched table.
 
-**What breaks if wrong.** A total that omits the oldest months, a ranking built on part of a portfolio, an "all properties" list that is not all properties. Nothing crashes. Somebody acts on a number that is quietly too low.
+**What breaks if wrong.** A total that omits the oldest months, a ranking built on part of a portfolio, an "all properties" list that is not all properties. Nothing crashes; somebody acts on a number that is quietly too low.
+
+## The lien clock is a calendar day
 
 <Paired>
 
@@ -119,16 +95,12 @@ export function stageDueOn(since: string, stage: LienStage): string {
 
 </CodeQuote>
 
-<Figure src="/work/lumaiq/03-delinquency-lien.webp" alt="LumaIQ Delinquency and Lien in the City Storage demo tenant: four units late across all stores, two behind on the ladder, three at a notice stage, 635 dollars of monthly rent at risk, and a lien calendar that groups each unit under the step it is due for, from a certified letter and a late notice that are overdue to an overlock due in one day and a notice of sale due in three." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Delinquency and Lien, the desk this schedule drives. Every date on the calendar is computed from the day the unit's clock started, which is why an overlock can be due tomorrow while the rent roll still says 32 days past due. City Storage demo tenant, no client data." />
+<Figure src="/work/lumaiq/03-delinquency-lien.webp" alt="LumaIQ Delinquency and Lien in the City Storage demo tenant: four units late across all stores, two behind on the ladder, three at a notice stage, 635 dollars of monthly rent at risk, and a lien calendar that groups each unit under the step it is due for, from a certified letter and a late notice that are overdue to an overlock due in one day and a notice of sale due in three." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Delinquency and Lien, the desk this schedule drives: every date computed from the day the unit's clock started. City Storage demo tenant, no client data." />
 
 </Paired>
 
-**Decision.** The lien clock is anchored to a fixed calendar day, not a rolling count. A rent roll reports days delinquent as of its own date, so the count is stale the moment the roll is a day old, but the day the clock started is not. Every date on the lien calendar is computed from that day.
+**Decision.** The lien clock is anchored to a fixed calendar day, not a rolling count: a rent roll's days-past-due is stale the moment the roll is a day old, but the day the clock started is not.
 
-**Measurement.** On the as-of date, the days past due reproduce the roll's own whole-day count exactly, which is how two rolls a month apart agree about when a notice was due. All arithmetic is on the calendar date in UTC: adding thirty days as thirty times 86,400 seconds to a local date crosses a daylight-saving boundary twice a year, and at the autumn crossing it lands the deadline an hour short, on the day before.
+**Measurement.** On the as-of date the days past due reproduce the roll's own whole-day count, and every step is added in whole days in UTC, so a daylight-saving boundary or a leap year cannot move a deadline.
 
-**What breaks if wrong.** A notice due date moves because nobody uploaded a roll this week, and a manager is held to a deadline that shifted under them. In a lien process the deadline is statutory, so a wrong date is not a late task. It is a sale that can be challenged.
-
-## What it taught me
-
-The interesting work is where operations meets software: how the messy reality of running a business becomes a system that actually reflects it. The rules that matter most are the ones that fail silently, and the only defence I trust is a test that walks the code and refuses the shortcut before it ships.
+**What breaks if wrong.** A notice date that shifts because nobody uploaded a roll this week, and a manager held to a deadline that moved under them. In a lien process the deadline is statutory, so a wrong date is a sale that can be challenged.

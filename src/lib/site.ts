@@ -41,5 +41,5 @@ export const SITE = {
   linkedin: 'https://www.linkedin.com/in/caleb-pham-1b8464252',
   github: 'https://github.com/CodeDaddy1',
   description:
-    'Founder and software engineer in Houston. Seven self-storage properties, 4,000 units, and the software I built to replace their month-end spreadsheets.',
+    'Founder and software engineer in Houston. Six storage properties in two Texas markets, then LumaIQ, built alone: the bridge between store desk and home office.',
 } as const

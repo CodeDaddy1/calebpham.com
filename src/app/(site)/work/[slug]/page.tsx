@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Container } from '@/components/container'
@@ -66,6 +67,12 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
                 </dd>
               </>
             )}
+            {(p.facts ?? []).map(([label, value]) => (
+              <Fragment key={label}>
+                <dt className="label">{label}</dt>
+                <dd className="m-0">{value}</dd>
+              </Fragment>
+            ))}
           </dl>
         </header>
         <div className="prose article-body mt-12 max-w-none">

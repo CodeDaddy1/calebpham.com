@@ -15,7 +15,6 @@ import { describe, expect, it } from 'vitest'
 import sitemap from './sitemap'
 import { SITE_URL } from '@/lib/site'
 import { publishedProjects } from '@/lib/projects'
-import { publishedNotes } from '@/lib/notes'
 
 const APP = fileURLToPath(new URL('.', import.meta.url))
 
@@ -39,7 +38,6 @@ function pageRoutes(dir = APP, prefix = ''): string[] {
 function expand(route: string): string[] {
   if (!route.includes('[')) return [route]
   if (route === '/work/[slug]') return publishedProjects().map((p) => `/work/${p.slug}`)
-  if (route === '/notes/[slug]') return publishedNotes().map((n) => `/notes/${n.slug}`)
   throw new Error(`sitemap.test.ts does not know how to expand ${route}`)
 }
 

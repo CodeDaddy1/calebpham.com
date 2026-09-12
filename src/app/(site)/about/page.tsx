@@ -1,18 +1,19 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Container } from '@/components/container'
-import { BIO } from '@/lib/bio'
+import { BELIEFS, BIO } from '@/lib/bio'
 import { SITE } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Founder and Software Engineer, Proptech, in Houston. An area manager in self-storage before a line of LumaIQ was written; back in school in finance and computer science.',
+    'Founder and Software Engineer, Proptech, in Houston. Self-taught since the pandemic; area manager for six storage properties before LumaIQ; golf and, once, the French horn.',
   alternates: { canonical: '/about' },
   openGraph: { url: '/about' },
 }
 
-// The bio is BIO, verbatim, in order, nothing added. The portrait is the only
+// The bio is BIO, in Caleb's words, in order, nothing added; the two beliefs
+// under it are BELIEFS, stated once, here. The portrait is the only
 // headshot on file (600 by 800); it renders at a fixed 280 CSS px so 2x is
 // 560 and never asks for more than the source has.
 export default function AboutPage() {
@@ -39,6 +40,19 @@ export default function AboutPage() {
               <p key={paragraph.slice(0, 24)}>{paragraph}</p>
             ))}
           </div>
+          <section aria-labelledby="beliefs" className="mt-10">
+            <h2 id="beliefs" className="label">
+              What I hold
+            </h2>
+            <ul className="rows mt-2 list-none p-0" style={{ marginTop: 0 }}>
+              {BELIEFS.map((line, i) => (
+                <li key={line} className="row m-0">
+                  <p className="label m-0">{String(i + 1).padStart(2, '0')}</p>
+                  <p className="text-foreground">{line}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
           <p className="mt-8 flex flex-wrap gap-3">
             <a href={`mailto:${SITE.email}`} className="pill pill-primary">
               Email Caleb

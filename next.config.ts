@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   poweredByHeader: false,
   images: { formats: ['image/avif', 'image/webp'], qualities: [60, 75] },
+  // Notes was removed on 2026-09-12 after one note had been live for a day and
+  // in the sitemap; anything that indexed it lands on the case studies.
+  async redirects() {
+    return [
+      { source: '/notes', destination: '/work', permanent: true },
+      { source: '/notes/:path*', destination: '/work', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {
