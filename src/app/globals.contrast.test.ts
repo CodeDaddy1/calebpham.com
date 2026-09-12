@@ -216,8 +216,16 @@ describe('the pre-reveal word colour', () => {
 })
 
 describe('the print palette is a paper document', () => {
+  it('overrides the tokens on :root, not on a weaker selector', () => {
+    const block = CSS.slice(CSS.indexOf('@media print'))
+    expect(block).toMatch(/\n  :root\s*\{[^}]*--foreground:/)
+    expect(block).not.toMatch(/\n  html\s*\{[^}]*--foreground:/)
+  })
+
   const at = CSS.indexOf('@media print')
-  const print = tokenBlock('  html', CSS.slice(at))
+  // The print block redefines the tokens on an indented :root (same specificity
+  // as the screen block, later in the file). A type selector would lose to :root.
+  const print = tokenBlock('  :root', CSS.slice(at))
   const paper = hexToRgb(print['--background'])
 
   for (const token of ['--foreground', '--muted-strong', '--muted'] as const) {

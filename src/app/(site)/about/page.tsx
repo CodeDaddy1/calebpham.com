@@ -6,8 +6,10 @@ import { SITE } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: BIO[0],
+  description:
+    'Founder and Software Engineer, Proptech, in Houston. An area manager in self-storage before a line of LumaIQ was written; back in school in finance and computer science.',
   alternates: { canonical: '/about' },
+  openGraph: { url: '/about' },
 }
 
 // The bio is BIO, verbatim, in order, nothing added. The portrait is the only

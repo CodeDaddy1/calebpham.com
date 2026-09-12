@@ -5,8 +5,10 @@ import { RESUME } from '@/lib/resume'
 
 export const metadata: Metadata = {
   title: 'Resume',
-  description: RESUME.summary,
+  description:
+    'The resume of Caleb Pham: Founding Software Engineer at LumaIQ after running seven self-storage properties in Houston. One Letter page, real text, as a PDF.',
   alternates: { canonical: '/resume' },
+  openGraph: { url: '/resume' },
 }
 
 // The download is an anchor, never a button: a download is a navigation. The

@@ -71,6 +71,31 @@ async function main() {
     const page = await browser.newPage()
     await page.goto(`http://localhost:${port}/resume`, { waitUntil: 'networkidle' })
     await page.emulateMedia({ media: 'print' })
+    // The print palette must actually apply: every piece of resume text has to
+    // compute to a dark ink on paper. A print override on a weaker selector
+    // than :root once lost to the screen tokens and shipped grey secondary text.
+    const faint = await page.evaluate(() => {
+      const lum = (r: number, g: number, b: number) => {
+        const f = (c: number) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
+        return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+      }
+      const out: string[] = []
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>('.resume *'))) {
+        const text = Array.from(el.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent?.trim() ?? '').join('')
+        if (!text) continue
+        const m = getComputedStyle(el).color.match(/\d+/g)
+        if (!m) continue
+        const [r, g, b] = m.map(Number)
+        // #555555 is the lightest print ink; anything brighter is the screen palette leaking through.
+        if (lum(r, g, b) > lum(0x55, 0x55, 0x55) + 0.001) out.push(`${el.tagName.toLowerCase()} rgb(${r}, ${g}, ${b}) "${text.slice(0, 40)}"`)
+      }
+      return out
+    })
+    if (faint.length) {
+      console.error(`refusing to write a PDF with ${faint.length} text element(s) in the screen palette under print:\n  ${faint.slice(0, 8).join('\n  ')}`)
+      await browser.close()
+      process.exit(1)
+    }
     await page.pdf({ path: OUT, format: 'Letter', preferCSSPageSize: true, printBackground: false })
     await browser.close()
   } finally {
