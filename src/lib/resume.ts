@@ -6,10 +6,14 @@
 // Source: Caleb's own account on 2026-09-12 (the plan's interview record).
 // The only management figures he allows are six properties, two Texas
 // markets, 3,000 units and 350,000 square feet, stated plainly; the earlier
-// draft's revenue, occupancy, unit count and team size are retired and
-// src/content/facts.test.ts refuses them. House diction: no dashes, no
-// exclamation marks, numbers in full, "to" for ranges, "and" not "&". No
-// phone number, no education section, no one-month role.
+// draft's portfolio revenue, occupancy, unit count and team size are retired
+// and src/content/facts.test.ts refuses them. The property manager role's
+// outcomes (7 percent occupancy, $110,000 to $145,000 a month) are his own
+// figures for that one facility, given 2026-09-12. House diction: no
+// dashes, no exclamation marks, numbers in full, "to" for ranges, "and" not
+// "&". No phone number, no education section, no one-month role, and the
+// part-time assistant manager position he holds now is left off by his
+// choice.
 
 /** A plain sentence, or a tracked label set before the sentence ("Revenue", "Risk"). */
 export type Bullet = string | { label: string; text: string }
@@ -103,12 +107,15 @@ export const RESUME: Resume = {
     },
     {
       company: 'The Jenkins Organization',
-      title: 'Property Manager, then Assistant Manager',
+      title: 'Property Manager',
       location: 'Houston, TX',
       start: '2024-10',
-      end: null,
-      note: 'Part-time since June 2026',
-      bullets: ['Ran a single property end to end: leasing, collections, and the books.'],
+      end: '2025-08',
+      bullets: [
+        'Ran a Class A facility end to end: leasing, collections, and the books.',
+        'Occupancy up 7 percent year over year; average monthly revenue from $110,000 to $145,000.',
+        'Promoted within the year into the operations leadership group as area manager.',
+      ],
     },
   ],
   skills: [
