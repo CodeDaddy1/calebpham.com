@@ -102,7 +102,7 @@ export const RESUME: Resume = {
         { label: 'Revenue', text: 'Rate strategy, existing-customer rate increases, occupancy and pricing across both markets.' },
         { label: 'Risk', text: 'Delinquency, lien compliance, auctions, audits and inspections.' },
         { label: 'Reporting', text: 'Month-end close, owner reports, and the BI the reviews ran on.' },
-        { label: 'People', text: 'Store-team hiring, training, scheduling and coaching across both markets.' },
+        { label: 'People', text: 'Interviewing candidates, training and coaching the store teams across both markets.' },
       ],
     },
     {

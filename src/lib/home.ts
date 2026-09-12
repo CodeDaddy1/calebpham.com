@@ -68,7 +68,7 @@ export const DESK_ROWS = [
   {
     number: '04',
     label: 'People',
-    text: 'Store-team hiring, training, scheduling and coaching across both markets.',
+    text: 'Interviewing candidates, training and coaching the store teams across both markets.',
   },
 ] as const
 
