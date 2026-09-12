@@ -35,9 +35,11 @@ const CHAPTER = arg('chapter')
 
 // Board order (src/lib/home.ts CHAPTERS): The City, The Desk, The Code.
 const CHAPTERS = [
-  { id: 'city', source: '18126746-uhd_3840_2160_30fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48 },
-  { id: 'desk', source: '853844-hd_1920_1080_25fps.mp4', fps: null, trim: 10, poster: 1.0, crf: 24, maxrate: '2.4M', bufsize: '4.8M', gop: 50 },
-  { id: 'code', source: '14519236_3840_2160_60fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48 },
+  // vp9: constrained quality. crf is the target, b/maxrate the cap that keeps a
+  // detailed clip (the aerial city, the code screen) under the 4 MB ceiling.
+  { id: 'city', source: '18126746-uhd_3840_2160_30fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' } },
+  { id: 'desk', source: '853844-hd_1920_1080_25fps.mp4', fps: null, trim: 10, poster: 1.0, crf: 24, maxrate: '2.4M', bufsize: '4.8M', gop: 50, vp9: { b: '1.5M', maxrate: '2.4M' } },
+  { id: 'code', source: '14519236_3840_2160_60fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' } },
 ]
 
 const run = (args) => execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...args], { stdio: 'inherit' })
@@ -74,7 +76,7 @@ function mp4(c, src) {
 function webm(c, src) {
   const out = join(OUT, `${c.id}-1080.webm`)
   const trim = c.trim ? ['-t', String(c.trim)] : []
-  const common = ['-i', src, ...trim, '-an', '-vf', scaleFilter(c), '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '34',
+  const common = ['-i', src, ...trim, '-an', '-vf', scaleFilter(c), '-c:v', 'libvpx-vp9', '-b:v', c.vp9.b, '-maxrate', c.vp9.maxrate, '-crf', '34',
     '-row-mt', '1', '-deadline', 'good', '-cpu-used', '1', '-g', String(c.gop), '-pix_fmt', 'yuv420p',
     '-passlogfile', join(TMP, `${c.id}-vp9`)]
   run([...common, '-pass', '1', '-f', 'null', '/dev/null'])

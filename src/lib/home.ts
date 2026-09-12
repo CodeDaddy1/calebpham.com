@@ -22,9 +22,9 @@ export interface Chapter {
 
 // Board order: the clip ids follow the design's own list.
 export const CHAPTERS: readonly Chapter[] = [
-  { id: 'city', number: '01', label: 'The City', source: 18126746, video: false },
-  { id: 'desk', number: '02', label: 'The Desk', source: 853844, video: false },
-  { id: 'code', number: '03', label: 'The Code', source: 14519236, video: false },
+  { id: 'city', number: '01', label: 'The City', source: 18126746, video: true },
+  { id: 'desk', number: '02', label: 'The Desk', source: 853844, video: true },
+  { id: 'code', number: '03', label: 'The Code', source: 14519236, video: true },
 ]
 
 export const videoSrc = (id: ChapterId, ext: 'mp4' | 'webm') => `/video/${id}-1080.${ext}`

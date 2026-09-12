@@ -58,8 +58,13 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
       const next = live === 0 ? 1 : 0
       const v = els[next]
       if (!v) return
+      const previous = live >= 0 ? els[live] : null
       play(v, i)
-        .then(() => { root.dataset.live = next === 0 ? 'a' : 'b'; live = next })
+        .then(() => {
+          root.dataset.live = next === 0 ? 'a' : 'b'
+          live = next
+          previous?.pause() // it has faded out; no reason to keep decoding it
+        })
         .catch(() => {})
     }
     const show = (i: number) => {
