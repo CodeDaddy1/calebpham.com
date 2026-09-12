@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Container } from '@/components/container'
-import { RevealObserver } from '@/components/reveal-observer'
+import { Reveal } from '@/components/reveal'
 import { getProject, publishedProjects } from '@/lib/projects'
 import { period } from '@/lib/dates'
 
@@ -37,7 +37,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   return (
     <Container className="py-14 sm:py-20">
       <article data-swatch={p.slug} className="mx-auto max-w-[720px]">
-        <RevealObserver />
+        <Reveal />
         <header className="swatch-rule pt-6">
           <p className="eyebrow text-swatch-ink">Case study</p>
           <h1 className="mt-3">{p.name}</h1>

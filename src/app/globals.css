@@ -47,11 +47,13 @@
   /* Stage. The glass over a white frame is #4F4F4F: foreground 7.00,
      muted-strong 4.95, muted 2.37, which is why .glass re-scopes --muted.
      --word-unlit is the colour a statement word holds before the reader
-     reaches it, only while JavaScript has armed the statement; it is 2.22 on
-     the ground and is NOT a text token. Reduced motion and no JS never set
-     it. globals.contrast.test.ts pins both facts.                            */
+     reaches it, only while JavaScript has armed the statement. The board
+     used #4A4A4A (2.22); this is the dimmest grey that still clears AA on
+     the ground (4.60), so an axe pass with motion on stays clean. It is
+     NOT a text token: reduced motion and no JS never set it, and
+     globals.contrast.test.ts pins that.                                     */
   --glass:      rgba(11, 11, 11, 0.72);
-  --word-unlit: #4A4A4A;
+  --word-unlit: #7A7A7A;
 
   /* Code inks. Code sits on --card; measured on page / card:
        keyword 9.25 / 8.66    string 10.83 / 10.14   comment 5.70 / 5.34
@@ -294,6 +296,54 @@ figcaption { color: var(--muted); margin-top: 0.5rem; }
 .pill-primary:hover { background: var(--accent-hover); }
 .pill-secondary { background: var(--card); color: var(--foreground); border: 1px solid var(--border-control); }
 .pill-secondary:hover { border-color: var(--foreground); }
+
+/* Fixed header, every page. Transparent over the home stage, solid elsewhere.
+   Every link is a 44px target; the clock reserves five tabular characters so
+   it fills in after mount without a shift.                                   */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 30;   /* above the chapter rail (20), so the open menu covers it */
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-inline: max(28px, env(safe-area-inset-left)) max(28px, env(safe-area-inset-right));
+  background: var(--background); border-bottom: 1px solid var(--border);
+}
+.site-header[data-over-video] { background: transparent; border-bottom: 0; }
+.nav-link { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--muted-strong); text-decoration: none; transition: color var(--dur-hover) var(--ease); }
+.nav-link:hover { color: var(--foreground); }
+.site-header-name { color: var(--foreground); }
+.site-header-clock { font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.clock-time { display: inline-block; min-width: 5ch; }
+.nav-inline { display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0; }
+.nav-menu { display: none; position: relative; }
+.nav-menu-summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: flex-end; min-height: 2.75rem; min-width: 2.75rem; color: var(--muted-strong); }
+.nav-menu-summary::-webkit-details-marker { display: none; }
+.nav-menu[open] .nav-menu-summary { color: var(--foreground); }
+.nav-menu-list { position: absolute; right: 0; top: calc(var(--header-h) - 0.5rem); list-style: none; margin: 0; padding: 0.5rem 1.25rem; min-width: 12rem; background: var(--background); border: 1px solid var(--border); }
+.nav-menu-list li { display: block; }
+@media (max-width: 759px) {
+  .nav-inline { display: none; }
+  .nav-menu { display: block; }
+}
+.site-main { padding-top: var(--header-h); }
+
+/* Hairline rows and project rows, shared by the home chapters and /work.     */
+.rows { margin-top: 40px; border-top: 1px solid var(--border-strong); }
+.row { padding: 20px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: minmax(0, 140px) minmax(0, 1fr); gap: 16px; }
+.row .label { color: var(--muted); }
+.row p { margin: 0; color: var(--muted-strong); font-size: 0.9375rem; }
+.project-row {
+  display: grid; grid-template-columns: minmax(0, 40px) minmax(0, 1fr) auto; gap: 16px; align-items: baseline;
+  padding: 20px 0; border-bottom: 1px solid var(--border);
+  text-decoration: none; color: var(--foreground);
+}
+.project-row .num { color: var(--muted); }
+.project-row-name { display: block; font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; font-stretch: 88%; }
+.project-row-line { display: block; margin-top: 8px; color: var(--muted-strong); font-size: 0.9375rem; }
+.project-row .cta { white-space: nowrap; color: var(--foreground); }
+@media (max-width: 479px) {
+  .project-row { grid-template-columns: minmax(0, 40px) minmax(0, 1fr); }
+  .project-row .cta { grid-column: 2; }
+}
 
 /* Reveal. The hidden state applies only after the observer is running, so no
    JS means everything is visible. [data-reveal] rises 14px; [data-reveal-words]
