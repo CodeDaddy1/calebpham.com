@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Notes',
   description: 'Short engineering notes: a decision, the measurement behind it, and what breaks if it is wrong.',
   alternates: { canonical: '/notes' },
+  openGraph: { url: '/notes' },
 }
 
 export default function NotesPage() {

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Work',
   description: 'Case studies: what was built, the decisions behind it, and what breaks if they are wrong.',
   alternates: { canonical: '/work' },
+  openGraph: { url: '/work' },
 }
 
 // Exists so a reader who trims /work/lumaiq to /work does not land on a 404.

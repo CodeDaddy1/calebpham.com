@@ -384,14 +384,16 @@ figcaption { color: var(--muted); margin-top: 0.5rem; }
 }
 
 /* Print: a separate document palette on paper. The tokens are redefined on
-   html (not :root, so the screen parsers never read this block) so every
-   text-muted in the resume prints as dark ink; every fill is dropped so the
-   page costs no colour ink. This block is the last thing in the file: the
-   resume stamp hashes from here to the end.                                  */
+   :root inside this block (indented, so the screen parsers, which anchor on a
+   line-start :root, never read it) at the same specificity as the screen
+   block and later in the file, so every text-muted in the resume prints as
+   dark ink. A type selector such as html would lose to :root and the greys
+   would print. Every fill is dropped so the page costs no colour ink. This
+   block is the last thing in the file: the resume stamp hashes from here.  */
 @page { size: letter; margin: 0.45in 0.6in; }
 @media print {
-  html {
-    font-size: 9.5pt;
+  html { font-size: 9.5pt; }
+  :root {
     --background: #FFFFFF; --card: #FFFFFF; --surface: transparent;
     --foreground: #111111; --muted-strong: #333333; --muted: #555555;
     --accent: #111111; --accent-hover: #111111; --accent-on: #FFFFFF; --accent-soft: transparent;
