@@ -1,38 +1,19 @@
-import { Newsreader, Inter, Geist_Mono } from 'next/font/google'
+import { Archivo, Geist_Mono } from 'next/font/google'
 
-// Display. One static instance at 500, the only display weight the site uses,
-// preloaded. The variable file with the optical-size axis measured 129 KB in
-// Phase 0, above the 90 KB the plan allows for a preloaded font; the static
-// cut is a quarter of that and the 36 to 56px headings keep the text-size
-// design of the face.
-export const newsreader = Newsreader({
-  weight: '500',
+// Display and body: one variable Archivo file carrying the width axis (62 to
+// 125), preloaded. The design sets headings narrow (font-stretch 80 to 88
+// percent), so the axis is the point; `weight` is omitted because next/font
+// refuses `weight` together with `axes` and a variable face covers 100 to
+// 900 anyway. The latin file measured 90 KB on 2026-09-12; it replaces Inter
+// (48 KB) and Newsreader (24 KB), both preloaded before. Google's @font-face
+// for this request declares `font-stretch: 62% 125%`, which is what lets
+// `font-stretch: 88%` in globals.css select the narrow instance.
+export const archivo = Archivo({
   subsets: ['latin'],
+  axes: ['wdth'],
   display: 'swap',
-  variable: '--font-newsreader',
-  fallback: ['Georgia', 'Times New Roman', 'serif'],
-})
-
-// Display italic: one static instance, not preloaded. A second family as far
-// as next/font is concerned; globals.css maps `em` inside display type to it.
-// Asking one call for weight x style arrays would download four files and
-// preload all four (next/font builds the cross product).
-export const newsreaderItalic = Newsreader({
-  weight: '400',
-  style: 'italic',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-newsreader-italic',
-  fallback: ['Georgia', 'Times New Roman', 'serif'],
-})
-
-// Body. Variable, one file, covers 400 / 500 / 600.
-export const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-  fallback: ['system-ui', 'Arial', 'sans-serif'],
+  variable: '--font-archivo',
+  fallback: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
 })
 
 // Code. One static weight, lazy (below the fold, not on every page).

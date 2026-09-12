@@ -13,14 +13,20 @@ export const OG_CONTENT_TYPE = 'image/png'
 // CSS variables, so these are literals, and globals.contrast.test.ts fails if
 // they drift from the tokens. A card that does not look like the site is a
 // small lie at the top of every share.
-const INK = '#1C1A17'
-const MUTED = '#5E5850'
-const ACCENT = '#9F4716'
-const PAGE = '#F6F1E8'
-const CARD = '#FFFDF9'
-const BORDER = 'rgba(28, 26, 23, 0.10)'
+const INK = '#EDEDED'
+const MUTED = '#8A8A8A'
+const MUTED_STRONG = '#C9C9C9'
+const ACCENT = '#EDEDED'
+const ACCENT_ON = '#0B0B0B'
+const PAGE = '#0B0B0B'
+const CARD = '#141414'
+const BORDER = 'rgba(255, 255, 255, 0.18)'
 
-/** The mark: two rust bars forming a corner, the same shape as icon.svg. */
+// ACCENT_ON is the ink on an accent fill. The card draws no filled control
+// today; the literal is pinned so the day it does, the ink is the measured one.
+void ACCENT_ON
+
+/** The mark: two light bars forming a corner, the same shape as icon.svg. */
 function Mark() {
   return (
     <div style={{ display: 'flex', position: 'relative', width: 56, height: 56 }}>
@@ -95,7 +101,7 @@ export function ogImage(card: OgCard): ImageResponse {
             {card.title}
           </div>
           {card.subtitle && (
-            <div style={{ display: 'flex', marginTop: 22, fontSize: 28, color: MUTED, lineHeight: 1.4, maxWidth: 900 }}>
+            <div style={{ display: 'flex', marginTop: 22, fontSize: 28, color: MUTED_STRONG, lineHeight: 1.4, maxWidth: 900 }}>
               {card.subtitle}
             </div>
           )}

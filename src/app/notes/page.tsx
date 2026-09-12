@@ -25,7 +25,7 @@ export default function NotesPage() {
             <p className="m-0 text-sm text-muted tnum">
               {longDate(n.date)}. {n.readingMinutes} minute read.
             </p>
-            <h2 className="mt-1 font-serif text-[1.5rem] font-medium leading-tight">
+            <h2 className="mt-1 text-[1.5rem] font-medium leading-tight">
               <Link href={`/notes/${n.slug}`} className="text-foreground no-underline hover:text-accent">
                 {n.title}
               </Link>

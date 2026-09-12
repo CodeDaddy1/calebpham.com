@@ -24,7 +24,7 @@ npm run icons        # regenerate favicon.ico and apple-icon.png from src/app/ic
 The suite enforces the design system rather than documenting it: every text
 colour token clears WCAG AA on both surfaces it can land on, no raw Tailwind
 palette class exists, every CSS variable named in source is declared, the site
-is light-only, the sitemap matches the routes on disk, prose follows the house
+is dark-only, the sitemap matches the routes on disk, prose follows the house
 diction, and the committed resume PDF matches the resume data.
 
 ## Licence

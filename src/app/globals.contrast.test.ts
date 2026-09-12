@@ -7,8 +7,10 @@
 //
 // This is a port of LumaIQ's gate, which exists because a muted token shipped
 // at 2.78:1 across 610 call sites and nothing caught it. Here it also measures
-// each case study's swatch block and pins the literal palette inside the OG
-// card, which cannot read CSS variables.
+// each case study's swatch block, the glass panel over the brightest frame the
+// home video can show, the print palette on paper, and pins the literal
+// palettes inside the OG card and the icon script, which cannot read CSS
+// variables.
 //
 // WHAT BREAKS IF THIS IS WRONG: a hiring manager on a phone in daylight cannot
 // read the line that says what you built. The failure is not a crash. It is a
@@ -16,15 +18,19 @@
 //
 // If a token has to change, change it and re-run this. Do not relax the floor.
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { PROJECTS } from '@/lib/projects'
 
 const CSS = readFileSync(fileURLToPath(new URL('./globals.css', import.meta.url)), 'utf-8')
+const CINEMA_PATH = fileURLToPath(new URL('./cinema.css', import.meta.url))
+const CINEMA = existsSync(CINEMA_PATH) ? readFileSync(CINEMA_PATH, 'utf-8') : ''
+const stripComments = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '')
 
-/** WCAG 2.1 AA for normal-size text. */
+/** WCAG 2.1 AA for normal-size text, and the floor for a control's boundary. */
 const AA_NORMAL = 4.5
+const AA_NON_TEXT = 3
 
 type RGB = [number, number, number]
 
@@ -32,9 +38,9 @@ type RGB = [number, number, number]
  * Pull one `selector { … }` block out of the stylesheet. Anchored to the start
  * of a line so a selector name inside a comment or an at-rule cannot match.
  */
-function tokenBlock(selector: string): Record<string, string> {
-  const m = CSS.match(new RegExp(`^${selector}\\s*(?:,[^{]*)?\\{([\\s\\S]*?)\\n\\}`, 'm'))
-  if (!m) throw new Error(`no ${selector} block in globals.css`)
+function tokenBlock(selector: string, css = CSS): Record<string, string> {
+  const m = css.match(new RegExp(`^${selector}\\s*(?:,[^{]*)?\\{([\\s\\S]*?)\\n\\}`, 'm'))
+  if (!m) throw new Error(`no ${selector} block`)
   const out: Record<string, string> = {}
   for (const d of m[1].matchAll(/(--[a-z-]+):\s*([^;]+);/g)) out[d[1]] = d[2].trim()
   return out
@@ -119,9 +125,16 @@ describe('text tokens', () => {
     expect(strong / muted).toBeGreaterThanOrEqual(1.3)
   })
 
-  it('white label on the accent fill clears AA (primary pill)', () => {
-    expect(contrast([255, 255, 255], hexToRgb(root['--accent']))).toBeGreaterThanOrEqual(AA_NORMAL)
-    expect(contrast([255, 255, 255], hexToRgb(root['--accent-hover']))).toBeGreaterThanOrEqual(AA_NORMAL)
+  it('the accent-on ink clears AA on the accent fill and its hover (primary pill, skip link)', () => {
+    const on = hexToRgb(root['--accent-on'])
+    expect(contrast(on, hexToRgb(root['--accent']))).toBeGreaterThanOrEqual(AA_NORMAL)
+    expect(contrast(on, hexToRgb(root['--accent-hover']))).toBeGreaterThanOrEqual(AA_NORMAL)
+  })
+
+  it('the control boundary clears the non-text floor on the page', () => {
+    const page = hexToRgb(root['--background'])
+    const edge = resolve(root['--border-control'], page)
+    expect(contrast(edge, page)).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
 })
 
@@ -159,40 +172,90 @@ describe('the Ninth Room extras', () => {
     expect(contrast(hexToRgb(s['--nr-chalk']), navy)).toBeGreaterThanOrEqual(AA_NORMAL)
   })
 
-  it('ink is readable on the yellow fill', () => {
-    const yellow = hexToRgb(s['--nr-yellow'])
-    expect(contrast(hexToRgb(root['--foreground']), yellow)).toBeGreaterThanOrEqual(AA_NORMAL)
+  it('chalk is readable on the ground', () => {
+    expect(contrast(hexToRgb(s['--nr-chalk']), page)).toBeGreaterThanOrEqual(AA_NORMAL)
   })
 
-  it('yellow on paper is BELOW the floor, which is why it is never ink', () => {
-    // A deliberate assertion that documents the rule. If a future yellow ever
-    // clears the floor, this test says so and the rule can be revisited on
-    // purpose rather than by accident.
-    expect(contrast(hexToRgb(s['--nr-yellow']), page)).toBeLessThan(AA_NORMAL)
+  it('the on-yellow ink is readable on the yellow fill', () => {
+    // --foreground is light and measures 1.12 on the yellow; a marker needs
+    // its own dark ink.
+    const yellow = hexToRgb(s['--nr-yellow'])
+    expect(contrast(hexToRgb(s['--nr-on-yellow']), yellow)).toBeGreaterThanOrEqual(AA_NORMAL)
   })
 })
 
-describe('the OG card keeps its frozen palette in sync', () => {
-  // src/lib/og-image.tsx hardcodes literal colours because Satori cannot read
-  // CSS custom properties. That is correct, and it means the card silently
-  // falls behind globals.css unless something compares them.
-  const src = readFileSync(fileURLToPath(new URL('../lib/og-image.tsx', import.meta.url)), 'utf-8')
+describe('the glass panel over the brightest frame the video can show', () => {
+  // The home video is footage nobody measured; the worst case under the glass
+  // is a white frame. The panel is measured over that, not over the ground.
+  const glass = resolve(root['--glass'], [255, 255, 255])
+
+  for (const token of ['--foreground', '--muted-strong'] as const) {
+    it(`${token} on the glass clears AA`, () => {
+      const ratio = contrast(hexToRgb(root[token]), glass)
+      expect(ratio, `${token} on the glass over white is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+    })
+  }
+
+  it('--muted does NOT, which is why .glass re-scopes --muted to --muted-strong', () => {
+    expect(contrast(hexToRgb(root['--muted']), glass)).toBeLessThan(AA_NORMAL)
+    if (CINEMA) expect(stripComments(CINEMA)).toMatch(/^\.glass\s*\{[^}]*--muted:\s*var\(--muted-strong\);/m)
+  })
+})
+
+describe('the pre-reveal word colour', () => {
+  it('is not a text token and only applies while JavaScript has armed the statement', () => {
+    expect(TEXT_TOKENS as readonly string[]).not.toContain('--word-unlit')
+    const rules = [...stripComments(CSS + '\n' + CINEMA).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter((m) => m[2].includes('var(--word-unlit)'))
+      .map((m) => m[1].trim())
+    for (const sel of rules) expect(sel, `${sel} paints --word-unlit outside the armed statement`).toMatch(/^\[data-statement-ready\]/)
+    // The reduced-motion block never arms the statement, so it never sets it either.
+    const reduced = stripComments(CSS + '\n' + CINEMA).match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\n\}/g) ?? []
+    for (const block of reduced) expect(block).not.toContain('--word-unlit')
+  })
+})
+
+describe('the print palette is a paper document', () => {
+  const at = CSS.indexOf('@media print')
+  const print = tokenBlock('  html', CSS.slice(at))
+  const paper = hexToRgb(print['--background'])
+
+  for (const token of ['--foreground', '--muted-strong', '--muted'] as const) {
+    it(`${token} in print clears AA on paper`, () => {
+      const ratio = contrast(resolve(print[token], paper), paper)
+      expect(ratio, `print ${token} is ${ratio.toFixed(2)}:1 on paper`).toBeGreaterThanOrEqual(AA_NORMAL)
+    })
+  }
+})
+
+describe('the OG card and the icon script keep their frozen palettes in sync', () => {
+  // src/lib/og-image.tsx and scripts/generate-icons.mjs hardcode literal
+  // colours because neither can read CSS custom properties. That is correct,
+  // and it means they silently fall behind globals.css unless something
+  // compares them.
+  const og = readFileSync(fileURLToPath(new URL('../lib/og-image.tsx', import.meta.url)), 'utf-8')
+  const icons = readFileSync(fileURLToPath(new URL('../../scripts/generate-icons.mjs', import.meta.url)), 'utf-8')
   const strip = (s: string) => s.replace(/\s+/g, '').toLowerCase()
 
-  const EXPECTED: [string, string][] = [
-    ['INK', root['--foreground']],
-    ['MUTED', root['--muted']],
-    ['ACCENT', root['--accent']],
-    ['PAGE', root['--background']],
-    ['CARD', root['--card']],
-    ['BORDER', root['--border']],
+  const EXPECTED: [string, string, string][] = [
+    ['og-image.tsx', 'INK', root['--foreground']],
+    ['og-image.tsx', 'MUTED', root['--muted']],
+    ['og-image.tsx', 'MUTED_STRONG', root['--muted-strong']],
+    ['og-image.tsx', 'ACCENT', root['--accent']],
+    ['og-image.tsx', 'ACCENT_ON', root['--accent-on']],
+    ['og-image.tsx', 'PAGE', root['--background']],
+    ['og-image.tsx', 'CARD', root['--card']],
+    ['og-image.tsx', 'BORDER', root['--border']],
+    ['generate-icons.mjs', 'GROUND', root['--background']],
+    ['generate-icons.mjs', 'MARK', root['--accent']],
   ]
 
-  for (const [name, tokenValue] of EXPECTED) {
-    it(`${name} matches the token`, () => {
+  for (const [file, name, tokenValue] of EXPECTED) {
+    it(`${file} ${name} matches the token`, () => {
+      const src = file === 'og-image.tsx' ? og : icons
       const m = src.match(new RegExp(`const ${name} = '([^']+)'`))
-      expect(m, `og-image.tsx has no \`const ${name}\``).toBeTruthy()
-      expect(strip(m![1]), `og-image.tsx ${name} is ${m![1]} but the token is ${tokenValue}`).toBe(strip(tokenValue))
+      expect(m, `${file} has no \`const ${name}\``).toBeTruthy()
+      expect(strip(m![1]), `${file} ${name} is ${m![1]} but the token is ${tokenValue}`).toBe(strip(tokenValue))
     })
   }
 })

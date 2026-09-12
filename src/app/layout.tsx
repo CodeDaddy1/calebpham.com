@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
-import { newsreader, newsreaderItalic, inter, geistMono } from './fonts'
+import { archivo, geistMono } from './fonts'
 import { SITE, SITE_URL } from '@/lib/site'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
@@ -20,20 +20,23 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
 }
 
-// The site is light-only. colorScheme tells the browser so form controls and
-// scrollbars do not follow a dark OS; globals.light-only.test.ts pins it.
+// The site is dark-only. colorScheme tells the browser so form controls and
+// scrollbars match; themeColor is the --background token; viewportFit lets the
+// fixed header and rail pad into the phone's safe areas. globals.dark-only.test.ts
+// pins the first two.
 export const viewport: Viewport = {
-  themeColor: '#F6F1E8',
-  colorScheme: 'light',
+  themeColor: '#0B0B0B',
+  colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${newsreaderItalic.variable} ${inter.variable} ${geistMono.variable}`}
+      className={`${archivo.variable} ${geistMono.variable}`}
     >
       <body className="flex min-h-dvh flex-col">
         <a href="#main" className="skip-link">

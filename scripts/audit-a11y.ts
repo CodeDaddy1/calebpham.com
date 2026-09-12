@@ -2,7 +2,12 @@
 // the 404 page, at 390 and 1280 pixels, and a hit test proving every link and
 // button offers a 44 pixel target on the phone width.
 //
-// Run:  npx tsx scripts/audit-a11y.ts --url=https://calebpham.com
+// Run:  npx tsx scripts/audit-a11y.ts --url=https://calebpham.com [--motion=reduce|no-preference]
+//
+// The default pass runs with reduced motion, so the home page is audited in
+// its poster state; --motion=no-preference mounts the video. Pages wait for
+// `load` plus a settle rather than `networkidle`, because a looping video
+// never idles.
 //
 // Exits 1 on any axe violation or any target that fails the hit test.
 
@@ -10,6 +15,7 @@ import { chromium } from 'playwright'
 import { AxeBuilder } from '@axe-core/playwright'
 
 const base = (process.argv.find((a) => a.startsWith('--url='))?.slice(6) ?? 'http://localhost:3000').replace(/\/$/, '')
+const motion = (process.argv.find((a) => a.startsWith('--motion='))?.slice(9) ?? 'reduce') as 'reduce' | 'no-preference'
 
 async function routesFromSitemap(): Promise<string[]> {
   const xml = await (await fetch(`${base}/sitemap.xml`)).text()
@@ -22,10 +28,11 @@ async function main() {
   const browser = await chromium.launch()
   let failures = 0
   for (const width of [390, 1280]) {
-    const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 900 }, reducedMotion: 'reduce' })
+    const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 900 }, reducedMotion: motion })
     for (const route of routes) {
       const page = await context.newPage()
-      await page.goto(`${base}${route}`, { waitUntil: 'networkidle' })
+      await page.goto(`${base}${route}`, { waitUntil: 'load' })
+      await page.waitForTimeout(400)
       const results = await new AxeBuilder({ page }).analyze()
       const violations = results.violations
       if (violations.length) {
@@ -62,7 +69,7 @@ async function main() {
     await context.close()
   }
   await browser.close()
-  console.log(`${routes.length} routes at 2 widths; ${failures} problems`)
+  console.log(`${routes.length} routes at 2 widths (motion ${motion}); ${failures} problems`)
   process.exit(failures ? 1 : 0)
 }
 

@@ -11,7 +11,7 @@ export function ProjectTeaser({ project, headingLevel = 'h3' }: { project: Proje
   return (
     <article className="rounded-md border border-line bg-card p-6 sm:p-7">
       <p className="eyebrow">{period(project.period.start, project.period.end)}</p>
-      <Heading className="mt-2 font-serif text-[1.5rem] font-medium leading-tight">
+      <Heading className="mt-2 text-[1.5rem] font-medium leading-tight">
         <Link href={`/work/${project.slug}`} className="text-foreground no-underline hover:text-accent">
           {project.name}
         </Link>
