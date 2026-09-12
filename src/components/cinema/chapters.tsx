@@ -119,9 +119,6 @@ export function Contact() {
           <a href={SITE.linkedin} rel="noopener">
             LinkedIn
           </a>
-          <a href={SITE.github} rel="noopener">
-            GitHub
-          </a>
         </div>
         <p className="colophon label m-0">
           {SITE.name} · {SITE.location} · {SITE.title}

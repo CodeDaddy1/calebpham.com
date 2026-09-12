@@ -2,7 +2,7 @@ Built for my wife's board exam: a multi-user study application where only verifi
 
 ## Retrieval runs as the caller
 
-<CodeQuote file="supabase/migrations/0003_match_chunks.sql" lines="8 to 34" href="https://github.com/CodeDaddy1/MDCB_Study/blob/999b0b7e7a27bf9e5d5169016a036d755ec9a3d6/supabase/migrations/0003_match_chunks.sql#L8-L34">
+<CodeQuote file="supabase/migrations/0003_match_chunks.sql" lines="8 to 34">
 
 ```sql
 create or replace function match_chunks(
@@ -43,7 +43,7 @@ $$;
 
 ## The verifier sees only the source
 
-<CodeQuote file="lib/agents/expert.ts" lines="282 to 320" href="https://github.com/CodeDaddy1/MDCB_Study/blob/999b0b7e7a27bf9e5d5169016a036d755ec9a3d6/lib/agents/expert.ts#L282-L320">
+<CodeQuote file="lib/agents/expert.ts" lines="282 to 320">
 
 ```ts
 export async function verify(input: VerifyInput): Promise<VerifyResult> {

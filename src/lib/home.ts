@@ -5,8 +5,8 @@
 //
 // Every fact below comes from Caleb's own account on 2026-09-12 (the plan's
 // interview record) or from a repository measurement. The management
-// figures he allows are six properties, two Texas markets, roughly 3,000
-// units and roughly 350,000 square feet; src/content/facts.test.ts refuses
+// figures he allows are six properties, two Texas markets, 3,000 units and
+// 350,000 square feet (stated plainly, at his word on 2026-09-12); src/content/facts.test.ts refuses
 // the ones he retired. Rows 6 (cityP) and 19 (contactP) of the earlier copy
 // table are his own lines; cityP now names both markets at his correction.
 
@@ -45,8 +45,8 @@ export interface Stat {
 export const STATS: readonly Stat[] = [
   { label: 'Properties', value: 6 },
   { label: 'Markets', value: 2 },
-  { label: 'Units, roughly', value: 3000 },
-  { label: 'Square feet, roughly', value: 350000 },
+  { label: 'Units', value: 3000 },
+  { label: 'Square feet', value: 350000 },
 ]
 
 export const DESK_ROWS = [

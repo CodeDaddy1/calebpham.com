@@ -58,6 +58,18 @@ describe('the record Caleb corrected on 2026-09-12 stays corrected', () => {
     })
   }
 
+  it('never links to GitHub or names the CodeDaddy1 handle', () => {
+    // His call on 2026-09-12: the handle reads as unprofessional, so the site
+    // links to no code host and the excerpts are the proof on their own.
+    const hits: string[] = []
+    for (const file of files) {
+      readFileSync(file, 'utf-8').split('\n').forEach((line, i) => {
+        if (/github\.com|CodeDaddy1/i.test(line)) hits.push(`${file.slice(SRC.length)}:${i + 1}`)
+      })
+    }
+    expect(hits).toEqual([])
+  })
+
   it('never calls him an operator', () => {
     const hits: string[] = []
     for (const file of files) {

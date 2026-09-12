@@ -19,11 +19,6 @@ export function SiteFooter() {
               LinkedIn
             </a>
           </li>
-          <li>
-            <a href={SITE.github} rel="noopener" className="inline-flex min-h-11 items-center hover:text-accent">
-              GitHub
-            </a>
-          </li>
         </ul>
       </Container>
     </footer>
