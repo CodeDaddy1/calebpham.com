@@ -12,8 +12,6 @@ Asset management software for self-storage operators, sold to multiple tenant co
 - **Control cost and risk.** Delinquency and Lien, Accounting, Property Audits, Field Ops.
 - **Report the result.** Owner Reports, Budget and Pro Forma, Ranking Reports, Home.
 
-<Figure src="/work/lumaiq/01-owner-reports.webp" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} caption="Owner Reports, the month-end desk. Every row is a store, every pill is what still stands between it and a sent report. Demo tenant, no client data." />
-
 Every competitor rate a tenant records is typed or pasted by a person (demo tenants are seeded with generated filler). Nothing fetches a competitor's site, and adding that is not on the table.
 
 ## How it is built
@@ -29,6 +27,8 @@ The suite is 2,453 tests in 176 files and runs on every push. Some of those test
 ## Two pieces of it
 
 The characteristic failure in this product is a wrong number that raises no error. Two excerpts, each with the decision, the measurement behind it, and what breaks if it is wrong.
+
+<Paired>
 
 <CodeQuote file="src/lib/supabase/page-all.ts" lines="28 to 54">
 
@@ -64,11 +64,17 @@ export async function pageAll<T>(build: () => Pageable): Promise<T[]> {
 
 </CodeQuote>
 
+<Figure src="/work/lumaiq/01-owner-reports.webp" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Owner Reports, the month-end desk this helper reads for: every row is a store, and the list is the whole portfolio rather than the first thousand rows a capped read would return. City Storage demo tenant, no client data." />
+
+</Paired>
+
 **Decision.** Every read of a table that can grow past a thousand rows goes through this helper, and the helper takes a function that builds a fresh query rather than a query. A PostgREST query builder is consumed when it is awaited, so passing the query itself would paginate one exhausted builder and return the first page forever.
 
 **Measurement.** PostgREST caps every select at 1,000 rows and returns a successful response when it truncates. It was first written for the rate-increase outcome history, exactly the kind of series that starts midway when a read is silently capped. The helper reads in pages of 1,000, stops on the first short page, refuses to go past 50,000 rows, and throws on the first error instead of returning a partial set. A test walks the source and fails any uncapped read of a watched table, so the rule is enforced rather than remembered.
 
 **What breaks if wrong.** A total that omits the oldest months, a ranking built on part of a portfolio, an "all properties" list that is not all properties. Nothing crashes. Somebody acts on a number that is quietly too low.
+
+<Paired>
 
 <CodeQuote file="src/lib/lien/schedule.ts" lines="25 to 60">
 
@@ -112,6 +118,10 @@ export function stageDueOn(since: string, stage: LienStage): string {
 ```
 
 </CodeQuote>
+
+<Figure src="/work/lumaiq/03-delinquency-lien.webp" alt="LumaIQ Delinquency and Lien in the City Storage demo tenant: four units late across all stores, two behind on the ladder, three at a notice stage, 635 dollars of monthly rent at risk, and a lien calendar that groups each unit under the step it is due for, from a certified letter and a late notice that are overdue to an overlock due in one day and a notice of sale due in three." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Delinquency and Lien, the desk this schedule drives. Every date on the calendar is computed from the day the unit's clock started, which is why an overlock can be due tomorrow while the rent roll still says 32 days past due. City Storage demo tenant, no client data." />
+
+</Paired>
 
 **Decision.** The lien clock is anchored to a fixed calendar day, not a rolling count. A rent roll reports days delinquent as of its own date, so the count is stale the moment the roll is a day old, but the day the clock started is not. Every date on the lien calendar is computed from that day.
 

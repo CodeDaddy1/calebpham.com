@@ -36,22 +36,22 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
 
   return (
     <Container className="py-14 sm:py-20">
-      <article data-swatch={p.slug} className="mx-auto max-w-[720px]">
+      <article data-swatch={p.slug}>
         <Reveal />
-        <header className="swatch-rule pt-6">
-          <p className="eyebrow text-swatch-ink">Case study</p>
+        <header className="swatch-rule max-w-[45rem] pt-6">
+          <p className="label text-swatch-ink">Case study</p>
           <h1 className="mt-3">{p.name}</h1>
           <p className="mt-4 text-[1.125rem] text-muted-strong">{p.tagline}</p>
-          <dl className="mt-6 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-            <dt className="text-muted">Role</dt>
+          <dl className="mt-8 grid gap-x-8 gap-y-3 border-t border-line pt-4 text-sm sm:grid-cols-[8rem_1fr]">
+            <dt className="label">Role</dt>
             <dd className="m-0">{p.role}</dd>
-            <dt className="text-muted">Period</dt>
+            <dt className="label">Period</dt>
             <dd className="m-0 tnum">{period(p.period.start, p.period.end)}</dd>
-            <dt className="text-muted">Stack</dt>
+            <dt className="label">Stack</dt>
             <dd className="m-0">{p.stack.join(', ')}</dd>
             {(p.links.live || p.links.repo) && (
               <>
-                <dt className="text-muted">Links</dt>
+                <dt className="label">Links</dt>
                 <dd className="m-0 flex flex-wrap gap-4">
                   {p.links.live && (
                     <a href={p.links.live} rel="noopener" className="inline-flex min-h-11 items-center text-accent underline underline-offset-4">
@@ -68,12 +68,12 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
             )}
           </dl>
         </header>
-        <div className="prose mt-12">
+        <div className="prose article-body mt-12 max-w-none">
           <Body />
         </div>
         <p className="mt-16 border-t border-line pt-6">
-          <Link href="/work" className="text-accent underline underline-offset-4">
-            All case studies
+          <Link href="/work" className="label nav-link">
+            All case studies <span aria-hidden="true">→</span>
           </Link>
         </p>
       </article>

@@ -27,7 +27,7 @@ export default function AboutPage() {
           className="h-auto w-[280px] max-w-full rounded-md border border-line"
         />
         <div>
-          <p className="eyebrow">About</p>
+          <p className="label">About</p>
           <h1 className="mt-3">{SITE.name}</h1>
           <p className="mt-2 text-muted-strong">
             {SITE.title}. {SITE.location}.

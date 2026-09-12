@@ -5,6 +5,7 @@ import type { ComponentProps, ReactElement } from 'react'
 import { CodeBlock, isCodeLang } from '@/components/code-block'
 import { CodeQuote } from '@/components/code-quote'
 import { Figure } from '@/components/figure'
+import { Paired } from '@/components/paired'
 
 // Required by @next/mdx on the App Router: without this file the build fails,
 // and with it every MDX file on the site renders through these mappings.
@@ -35,6 +36,7 @@ const components = {
   pre: Pre,
   CodeQuote,
   Figure,
+  Paired,
 } satisfies MDXComponents
 
 export function useMDXComponents(): MDXComponents {

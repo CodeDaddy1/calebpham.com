@@ -4,13 +4,13 @@ The Ninth Room is a YouTube channel: a family explores the world's most interest
 
 Raw footage goes into a work folder and one command runs the pipeline: it transcribes the takes locally with faster-whisper, picks the best take of each line, cuts dead space, designs the story, builds the timeline in DaVinci Resolve with cuts, transitions, brand cards and captions, and renders the finished episode. Every stage runs on the machine by default; the two paid cloud paths are opt-in extras, a flag that sends transcription to a hosted speech model when proper nouns matter and a pull from a licensed sound library. Editorial judgment runs as Claude Code subagents reading the transcript and the brief, and the numbers that gate a cut come from film studies I wrote up first.
 
-<Figure src="/work/the-ninth-room/01-chapter-card.webp" alt="A Ninth Room chapter card rendered by the pipeline: the arch-door chapter meter with the first of five doors lit yellow, the cyan eyebrow First Stop, and the chalk title The Cockrell Butterfly Center with a butterfly emoji, on navy." width={1600} height={900} caption="A chapter card, rendered by the overlay kit and composited on the brand's navy. One yellow moment per frame; the doors are the episode's real chapter count." />
-
 ## How it is built
 
 Python 3.9 on the interpreter macOS ships, plus ffmpeg, Pillow, and headless Chrome for the cards. The only service is a loopback-only engine, an HTTP API and media server on the machine itself, and there is no database: an episode is a folder of files, and every stage reads the files the stage before it wrote. The repository has 271 commits and 75 test files, run with the standard library's unittest.
 
 The hard part was DaVinci Resolve. Its scripting API cannot be driven from outside the application reliably, so the pipeline installs a small Lua script inside Resolve that loops forever watching a spool directory. Python writes a Lua chunk into the inbox, the bridge runs it with Resolve's own objects and writes a result file, and Python reads it back. Every timeline import, proxy link, and render request goes through that one door.
+
+<Paired>
 
 <CodeQuote file="pipeline/resolve_api.py" lines="189 to 217" href="https://github.com/CodeDaddy1/the-ninth-room/blob/86d24e9e941a1a58a5cee1cb6c88403b81f03d7a/pipeline/resolve_api.py#L189-L217">
 
@@ -48,17 +48,21 @@ def send(label: str, lua: str, timeout: float = 120.0) -> str:
 
 </CodeQuote>
 
+<Figure src="/work/the-ninth-room/01-chapter-card.webp" alt="A Ninth Room chapter card rendered by the pipeline: the arch-door chapter meter with the first of five doors lit yellow, the cyan eyebrow First Stop, and the chalk title The Cockrell Butterfly Center with a butterfly emoji, on navy." width={1600} height={900} sizes="(min-width: 64rem) 400px, 100vw" caption="A chapter card rendered by the overlay kit. Every card, clip and proxy reaches the Resolve timeline through the one door this function opens. One yellow moment per frame; the doors are the episode's real chapter count." />
+
+</Paired>
+
 **Decision.** One function sends every command to Resolve, and the command is a file. A file-based spool survives the things a socket does not: Resolve blocking on a modal dialog, a render holding the API for an hour, the bridge script being restarted from the menu. Each command gets a sequence number, its own result file, and a deadline.
 
 **Measurement.** The sequence seeds from the clock and wraps at 100,000, so a result file left over from a previous day could satisfy a new command instantly. That happened in review, which is why the result file is deleted before its command is spooled. The bridge signals completion by writing the result, and the reader waits 200 milliseconds after seeing it so a half-written file is never parsed.
 
 **What breaks if wrong.** A timeline that imports twice, a render that reports done while Resolve is still writing, or a Python process that waits forever on a bridge that died. Each is a failure the spool's rules exist to prevent, and each is why a rule is there.
 
-<Figure src="/work/the-ninth-room/02-endcard.webp" alt="The Ninth Room end card: the Archway mark in chalk on navy with the channel name in Newsreader." width={1600} height={900} caption="The end card from the channel kit. The Archway is the mark; the arch radius is exactly half the width, the one true curve in the system." />
-
 ## The bar a cut must clear
 
 The shipped first cut was a transcript in shoot order: 82 beats, 78 percent of them purpose "build", one hook, one payoff, and a pace of 12.6 cuts a minute against the 18 to 22 that the channels I studied run. Nothing in the pipeline had checked. So the craft bar exists, and it is written down before the code.
+
+<Paired>
 
 <CodeQuote file="pipeline/cutbar.py" lines="1 to 33" href="https://github.com/CodeDaddy1/the-ninth-room/blob/86d24e9e941a1a58a5cee1cb6c88403b81f03d7a/pipeline/cutbar.py#L1-L33">
 
@@ -99,6 +103,10 @@ against the plan, not the truth of the finished timeline.
 ```
 
 </CodeQuote>
+
+<Figure src="/work/the-ninth-room/02-endcard.webp" alt="The Ninth Room end card: the Archway mark in chalk on navy with the channel name in Newsreader." width={1600} height={900} sizes="(min-width: 64rem) 400px, 100vw" caption="The end card from the channel kit, the last beat of every cut the bar measures. The Archway is the mark; the arch radius is exactly half the width, the one true curve in the system." />
+
+</Paired>
 
 **Decision.** The numbers that gate a cut live in one pure module with two entry points: one returns the metrics and never blocks, the other returns the notes a cut must clear and an empty list is a pass. Both take parsed dictionaries in and give numbers or sentences out, so they can be run on a plan that is half edited without raising.
 

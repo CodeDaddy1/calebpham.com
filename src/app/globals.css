@@ -345,6 +345,22 @@ figcaption { color: var(--muted); margin-top: 0.5rem; }
   .project-row .cta { grid-column: 2; }
 }
 
+/* A code excerpt beside its demo screen (src/components/paired.tsx). The
+   article body keeps the reading measure for prose; a pair may use the
+   whole container.                                                           */
+.article-body > :not(.pair) { max-width: var(--measure); }
+.article-body > .wide { max-width: min(100%, 80ch); }
+/* minmax(0, …) and min-width: 0 on the items: a code block's longest line
+   would otherwise set the column's minimum and push the page sideways.    */
+.pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; margin-block: 2rem; max-width: none; }
+.pair > * { min-width: 0; }
+.pair > figure { margin-block: 0; max-width: none; }
+.pair pre { margin-block: 0; }
+@media (min-width: 64rem) {
+  .pair { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; }
+  .pair > figure:last-child { position: sticky; top: calc(var(--header-h) + 1rem); }
+}
+
 /* Reveal. The hidden state applies only after the observer is running, so no
    JS means everything is visible. [data-reveal] rises 14px; [data-reveal-words]
    lifts each word out of an overflow-hidden clip.                            */

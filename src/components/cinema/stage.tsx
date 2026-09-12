@@ -131,7 +131,7 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
           scrim. The two files are also preloaded by media in page.tsx. */}
       <picture>
         <source ref={small} media="(max-width: 759px)" srcSet={posterSrc(first, 900)} />
-        {/* eslint-disable-next-line @next/next/no-img-element -- a fixed cover layer, swapped by hand; next/image would wrap it in layout it does not have */}
+        {/* A plain img on purpose: a fixed cover layer swapped by hand; next/image would wrap it in layout it does not have. */}
         <img ref={img} className="stage-poster" alt="" decoding="async" fetchPriority="high" src={posterSrc(first, 1600)} />
       </picture>
       <video ref={a} className="stage-video" data-role="a" muted playsInline loop preload="none" disablePictureInPicture tabIndex={-1} />
