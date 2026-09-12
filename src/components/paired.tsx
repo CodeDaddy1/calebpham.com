@@ -15,3 +15,5 @@ import type { ReactNode } from 'react'
 export function Paired({ children }: { children: ReactNode }) {
   return <div className="pair">{children}</div>
 }
+// The frame, the label bar and the entrance order (screen first, code 100ms
+// after) are CSS in globals.css under `.pair`.

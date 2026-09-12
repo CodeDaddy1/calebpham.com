@@ -97,4 +97,17 @@ describe.each(publishedProjects().map((p) => p.slug))('case study %s', (slug) =>
     }
     expect((src.match(/<Paired\b/g) ?? []).length, 'every Paired is closed').toBe((src.match(/<\/Paired>/g) ?? []).length)
   })
+
+  // The three labels live inside a <Notes> block so they render as a strip.
+  it('keeps every Decision, Measurement and What-breaks inside a Notes block', () => {
+    const blocks = [...src.matchAll(/<Notes>([\s\S]*?)<\/Notes>/g)].map((m) => m[1])
+    expect(blocks.length, 'one Notes per excerpt').toBe(quotes.length)
+    for (const b of blocks) {
+      expect(b).toMatch(/\*\*Decision\.\*\*/)
+      expect(b).toMatch(/\*\*Measurement\.\*\*/)
+      expect(b).toMatch(/\*\*What breaks if wrong\.\*\*/)
+    }
+    const outside = src.replace(/<Notes>[\s\S]*?<\/Notes>/g, '')
+    expect(outside).not.toMatch(/\*\*(Decision|Measurement|What breaks if wrong)\.\*\*/)
+  })
 })

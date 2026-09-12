@@ -6,6 +6,7 @@ import { CodeBlock, isCodeLang } from '@/components/code-block'
 import { CodeQuote } from '@/components/code-quote'
 import { Figure } from '@/components/figure'
 import { Paired } from '@/components/paired'
+import { Notes } from '@/components/notes'
 
 // Required by @next/mdx on the App Router: without this file the build fails,
 // and with it every MDX file on the site renders through these mappings.
@@ -37,6 +38,7 @@ const components = {
   CodeQuote,
   Figure,
   Paired,
+  Notes,
 } satisfies MDXComponents
 
 export function useMDXComponents(): MDXComponents {

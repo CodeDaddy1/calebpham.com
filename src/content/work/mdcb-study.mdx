@@ -35,11 +35,15 @@ $$;
 
 </CodeQuote>
 
+<Notes>
+
 **Decision.** Retrieval is a database function, not application code: one SQL function returns the nearest chunks inside one deck, and the deck filter lives in the function, so a search cannot cross decks.
 
 **Measurement.** Cosine similarity is returned as one minus the distance the index orders by, so the same expression drives both the ordering and the number the caller sees.
 
 **What breaks if wrong.** A question grounded in another deck's material, or a search that ignores the index and scans every chunk. Both are silent: the quiz still renders.
+
+</Notes>
 
 ## The verifier sees only the source
 
@@ -89,8 +93,12 @@ export async function verify(input: VerifyInput): Promise<VerifyResult> {
 
 </CodeQuote>
 
+<Notes>
+
 **Decision.** The verifier is sent only the cited chunks, the question and the proposed answer, never the drafting model's reasoning, and its reply is constrained to a schema.
 
 **Measurement.** Verification runs on Claude Haiku while drafting runs on Claude Sonnet, so the check costs a fraction of the draft; a reply that misses the schema counts as unsupported, and only verified rows reach the quiz page.
 
 **What breaks if wrong.** A confident, well-written question whose answer is not in the source. On a board exam that is the most expensive kind of wrong.
+
+</Notes>
