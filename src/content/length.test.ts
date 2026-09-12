@@ -22,7 +22,7 @@ import { RESUME } from '@/lib/resume'
 const CONTENT = fileURLToPath(new URL('.', import.meta.url))
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length
 
-const LIMITS = { paragraph: 60, caseStudy: 400, homeString: 40, bio: 150, caption: 30, bullet: 30 }
+const LIMITS = { paragraph: 60, caseStudy: 400, homeString: 40, bio: 220, caption: 30, bullet: 30 }   // bio raised from 150 on 2026-09-12: he asked for its weight back, five short paragraphs
 
 /** Prose of an MDX file: fences, tags and headings removed, split on blank lines. */
 function proseParagraphs(src: string): string[] {
