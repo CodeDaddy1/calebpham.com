@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function ResumePage() {
   return (
     <>
-      <PageBand label="Resume" title={RESUME.name} lede={RESUME.headline} className="band-resume">
+      <PageBand label="Resume" title={RESUME.name} banner="resume" lede={RESUME.headline} className="band-resume">
         <ul className="resume-contact band-contact">
           <li>{RESUME.location}</li>
           <li>

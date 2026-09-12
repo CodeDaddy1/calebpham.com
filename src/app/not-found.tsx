@@ -14,7 +14,7 @@ export default function NotFound() {
     <>
       <SiteHeader />
       <main id="main" className="site-main flex-1">
-        <PageBand label="404" title="Not found" lede="There is no page at this address." />
+        <PageBand label="404" title="Not found" banner="not-found" lede="There is no page at this address." />
         <Container className="py-12">
           <p className="rise-in">
             <Link href="/" className="pill pill-secondary">

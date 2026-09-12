@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { posterSrc, type ChapterId } from '@/lib/home'
+import { BANNERS, bannerSrc, type BannerSlug } from '@/lib/banners'
 import { Words } from './cinema/words'
 
 // Every inner page opens like a chapter: a still of the home's footage under a
@@ -15,6 +16,7 @@ export function PageBand({
   label,
   title,
   lede,
+  banner,
   poster = 'city',
   children,
   className = '',
@@ -22,22 +24,26 @@ export function PageBand({
   label: string
   title: string
   lede?: ReactNode
+  /** A committed Pexels photo (src/lib/banners.ts), chosen for the page. */
+  banner?: BannerSlug
+  /** Fallback when no banner is chosen: one of the home's poster frames. */
   poster?: ChapterId
   /** Anything after the lede: a contact row, a meta line. Enters last. */
   children?: ReactNode
   className?: string
 }) {
+  const src = banner && banner in BANNERS ? (w: 900 | 1600) => bannerSrc(banner, w) : (w: 900 | 1600) => posterSrc(poster, w)
   return (
     <section className={`band ${className}`} data-band>
-      {/* A plain img: a cover under a scrim, already cached from the home; next/image would wrap it in layout it does not have. */}
+      {/* A plain img: a cover under a scrim; next/image would wrap it in layout it does not have. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         className="band-poster"
         alt=""
         decoding="async"
-        srcSet={`${posterSrc(poster, 900)} 900w, ${posterSrc(poster, 1600)} 1600w`}
+        srcSet={`${src(900)} 900w, ${src(1600)} 1600w`}
         sizes="100vw"
-        src={posterSrc(poster, 1600)}
+        src={src(1600)}
       />
       <div className="band-scrim" />
       <div className="band-content">

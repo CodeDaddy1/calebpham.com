@@ -45,7 +45,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   return (
     <article data-swatch={p.slug}>
       <Reveal />
-      <PageBand label="Case study" title={p.name} lede={p.tagline} className="band-swatch">
+      <PageBand label="Case study" title={p.name} lede={p.tagline} banner={p.slug} className="band-swatch">
         {p.links.live && (
           <a href={p.links.live} rel="noopener" className="label nav-link band-link">
             Live site <span aria-hidden="true">→</span>
