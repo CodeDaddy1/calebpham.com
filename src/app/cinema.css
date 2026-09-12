@@ -35,7 +35,7 @@
    alone (src/lib/home.assets.test.ts measures each chapter's frame under
    its own stops). */
 #cinema[data-chapter='1'] .scrim { --s1: 0.45; }
-#cinema[data-chapter='2'] .scrim { --s0: 0.45; --s1: 0.6; --s2: 0.95; }
+#cinema[data-chapter='2'] .scrim { --s0: 0.3; --s1: 0.45; --s2: 0.85; }   /* the board's stops; the glass panel carries the text */
 
 /* Chapters: a two-column grid whose right column holds the text, 640px wide. */
 .chapter {

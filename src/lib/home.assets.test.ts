@@ -31,7 +31,7 @@ const CAP = { poster1600: 160 * KB, poster900: 70 * KB, video: 4 * 1024 * KB }
 const SCRIM = {
   city: [0.2, 0.35, 0.9],
   desk: [0.2, 0.45, 0.9],
-  code: [0.45, 0.6, 0.95],
+  code: [0.3, 0.45, 0.85],
 } as const
 /** The chapter-2 stage filter darkens the frame before the scrim. */
 const BRIGHTNESS = { city: 1, desk: 1, code: 0.8 } as const
