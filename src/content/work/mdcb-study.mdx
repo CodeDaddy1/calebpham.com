@@ -1,12 +1,6 @@
-## What it is
+Built for my wife's board exam: a multi-user study application where only verified questions are ever served.
 
-A multi-user study application in the Quizlet mould, whose first deck is my own material for the Medical Dosimetry Certification Board exam. Upload the course handouts and answer keys, and it produces multiple-choice questions where every option carries a rationale and every stored question cites the passage it came from. It is a small repository, five commits in a single evening in June 2026, and the interesting part is the rule it enforces.
-
-## The grounding rule
-
-Only verified questions are ever served. A question is drafted by one model from retrieved source chunks, then a second, cheaper model is asked one thing: is the proposed answer fully supported by the cited chunks? If not, the question is never written as verified, and the quiz page reads only verified rows. Two runtime agents exist, a Source Expert that ingests, extracts concepts, retrieves, and verifies, and a Quiz Generator that drafts; they hold every model call in the app, and the scoring and streak layer is specified as plain SQL.
-
-Retrieval is a vector search in Postgres. Chunks carry a 1,024-dimension embedding, and one SQL function returns the nearest chunks for a query inside one deck.
+## Retrieval runs as the caller
 
 <CodeQuote file="supabase/migrations/0003_match_chunks.sql" lines="8 to 34" href="https://github.com/CodeDaddy1/MDCB_Study/blob/999b0b7e7a27bf9e5d5169016a036d755ec9a3d6/supabase/migrations/0003_match_chunks.sql#L8-L34">
 
@@ -41,11 +35,13 @@ $$;
 
 </CodeQuote>
 
-**Decision.** Retrieval is a database function, not application code, and it runs as the caller: row-level security on the chunks table still applies to whoever asks. The function is scoped to one deck, orders by cosine distance over an HNSW index, and clamps the requested count to at least one.
+**Decision.** Retrieval is a database function, not application code: one SQL function returns the nearest chunks inside one deck, and the deck filter lives in the function, so a search cannot cross decks.
 
-**Measurement.** Cosine similarity is returned as one minus the distance the index orders by, so the same expression drives both the ordering and the number the caller sees. Eight chunks per query is the default; the generator passes the same eight into the draft as numbered context so the model can cite chunk numbers rather than paraphrase.
+**Measurement.** Cosine similarity is returned as one minus the distance the index orders by, so the same expression drives both the ordering and the number the caller sees.
 
 **What breaks if wrong.** A question grounded in another deck's material, or a search that ignores the index and scans every chunk. Both are silent: the quiz still renders.
+
+## The verifier sees only the source
 
 <CodeQuote file="lib/agents/expert.ts" lines="282 to 320" href="https://github.com/CodeDaddy1/MDCB_Study/blob/999b0b7e7a27bf9e5d5169016a036d755ec9a3d6/lib/agents/expert.ts#L282-L320">
 
@@ -93,12 +89,8 @@ export async function verify(input: VerifyInput): Promise<VerifyResult> {
 
 </CodeQuote>
 
-**Decision.** The verifier is sent only the cited chunks, the question, and the proposed answer, never the drafting model's reasoning, and its reply is constrained to a fixed shape (supported, which chunk, why). A question with no citations is unsupported before any model is called.
+**Decision.** The verifier is sent only the cited chunks, the question and the proposed answer, never the drafting model's reasoning, and its reply is constrained to a schema.
 
-**Measurement.** Verification runs on a smaller model than drafting, so the check costs a fraction of the draft. The reply is parsed against a schema, and a reply with no structured output is treated as unsupported rather than as an error to retry past.
+**Measurement.** Verification runs on Claude Haiku while drafting runs on Claude Sonnet, so the check costs a fraction of the draft; a reply that misses the schema counts as unsupported, and only verified rows reach the quiz page.
 
-**What breaks if wrong.** A confident, well-written question whose answer is not in the source. On a board exam that is the most expensive kind of wrong, because it teaches the mistake with a rationale attached.
-
-## What it taught me
-
-The same rule that makes a report trustworthy makes a study aid trustworthy: nothing is shown that cannot be traced to its source. Drafting with one model and checking with another was the cheapest way to make that rule hold.
+**What breaks if wrong.** A confident, well-written question whose answer is not in the source. On a board exam that is the most expensive kind of wrong.

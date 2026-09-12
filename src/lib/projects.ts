@@ -24,15 +24,22 @@ export interface Project {
   /** Only published items render, build, or enter the sitemap. */
   status: Status
   links: { repo?: string; live?: string }
+  /** Measured facts for the case-study header, label and value, after the links. */
+  facts?: [label: string, value: string][]
 }
 
 export const PROJECTS: readonly Project[] = [
   {
     slug: 'lumaiq',
     name: 'LumaIQ',
-    tagline: 'Asset management software for self-storage operators, built as sole engineer.',
+    tagline: 'Asset management software for self-storage operators, from the store desk to the home office.',
     blurb:
-      'Asset management software for self-storage operators. Rate increases priced against the move-outs they risk, a lien clock that holds up, and owner reports with a delivery ledger.',
+      'Asset management for self-storage operators: rate increases, the lien clock, owner reports and the month-end close, from the store desk to the home office.',
+    facts: [
+      ['Suite', '2,453 tests in 176 files, on every push'],
+      ['Tenancy', 'Postgres with row-level security as the boundary'],
+      ['Models', 'Anthropic and OpenAI for documents and decisions'],
+    ],
     role: 'Founder and sole engineer',
     period: { start: '2026-04', end: null },
     stack: ['Next.js 16', 'React 19', 'TypeScript', 'Supabase Postgres', 'Tailwind CSS 4', 'Vercel'],
@@ -42,9 +49,13 @@ export const PROJECTS: readonly Project[] = [
   {
     slug: 'the-ninth-room',
     name: 'The Ninth Room pipeline',
-    tagline: 'A local Python pipeline that turns raw footage into a finished episode in DaVinci Resolve.',
+    tagline: 'A Python pipeline that turns raw footage into a cut timeline in DaVinci Resolve.',
     blurb:
-      'A Python pipeline that carries raw footage to a cut timeline in DaVinci Resolve, from transcription to story to edit, run from one machine.',
+      'A Python pipeline that carries raw footage to a cut timeline in DaVinci Resolve, run from one machine.',
+    facts: [
+      ['Commits', '271, public'],
+      ['Tests', '75 files, standard-library unittest'],
+    ],
     role: 'Sole engineer',
     period: { start: '2026-06', end: null },
     stack: ['Python 3.9', 'ffmpeg', 'faster-whisper', 'Pillow', 'DaVinci Resolve scripting'],
@@ -54,9 +65,13 @@ export const PROJECTS: readonly Project[] = [
   {
     slug: 'mdcb-study',
     name: 'MDCB Study',
-    tagline: 'Source-grounded exam preparation: every question cites the passage it came from.',
+    tagline: 'Exam preparation where every question cites the passage it came from.',
     blurb:
-      'Exam preparation where every question cites the passage it came from, so a wrong answer can be traced and a right one trusted.',
+      'Built for my wife\'s board exam: every question cites the passage it came from.',
+    facts: [
+      ['Retrieval', 'pgvector, 1,024-dimension embeddings, one SQL function'],
+      ['Verification', 'A second model, the cited chunks only, a schema-checked reply'],
+    ],
     role: 'Sole engineer',
     period: { start: '2026-06', end: '2026-06' },
     stack: ['Next.js 16', 'TypeScript', 'Supabase Postgres', 'pgvector', 'Anthropic'],

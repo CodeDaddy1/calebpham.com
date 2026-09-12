@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { absoluteUrl } from '@/lib/site'
 import { publishedProjects } from '@/lib/projects'
-import { publishedNotes } from '@/lib/notes'
 
 // Every route on the site is public and static, so this is a plain list.
 // sitemap.test.ts walks src/app for page.tsx files and fails if this list and
@@ -17,7 +16,6 @@ type Entry = MetadataRoute.Sitemap[number]
 const FIXED: [path: string, priority: number][] = [
   ['/', 1],
   ['/work', 0.8],
-  ['/notes', 0.7],
   ['/about', 0.8],
   ['/resume', 0.8],
 ]
@@ -37,12 +35,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }))
 
-  const notes: Entry[] = publishedNotes().map((n) => ({
-    url: absoluteUrl(`/notes/${n.slug}`),
-    lastModified: new Date(`${n.date}T12:00:00Z`),
-    changeFrequency: 'yearly',
-    priority: 0.6,
-  }))
-
-  return [...fixed, ...work, ...notes]
+  return [...fixed, ...work]
 }

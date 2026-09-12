@@ -1,97 +1,103 @@
-import type { Resume } from '@/lib/resume'
-import { monthYear } from '@/lib/dates'
+import type { Bullet, Resume, Role } from '@/lib/resume'
+import { monthYearShort } from '@/lib/dates'
 
 // The printable resume. /resume renders this on screen and
-// scripts/build-resume-pdf.ts prints the same route to Letter, so the web page
-// and the PDF cannot disagree. Single column on purpose: the draft's own note
-// is that a single column parses in every applicant tracking system.
+// scripts/build-resume-pdf.mts prints the same route to Letter, so the web
+// page and the PDF cannot disagree. One column in reading order, so an
+// applicant tracking system reads it the way a person does: header, summary,
+// facts, experience, skills. Structure is hairlines and type, never a fill,
+// because the PDF is printed without backgrounds.
 //
-// Print rules live in globals.css under @media print: no header, no footer,
-// no fills, ink #111111, roles never split across a page.
+// Every element carries a resume-* class. The screen rules and the print
+// block in globals.css are keyed to those names and nothing else, so a
+// utility class here can never change the paper layout by accident.
 
-function dates(start: string, end: string | null): string {
-  return `${monthYear(start)} to ${end === null ? 'present' : monthYear(end)}`
+function DateRail({ role }: { role: Role }) {
+  // Two stacked lines beside the role from 40rem; one line below it. The
+  // literal space is what makes the one-line form read as a range.
+  return (
+    <p className="resume-rail label tnum">
+      <time dateTime={role.start}>{monthYearShort(role.start)}</time>{' '}
+      {role.end === null ? <span>to present</span> : <time dateTime={role.end}>to {monthYearShort(role.end)}</time>}
+    </p>
+  )
+}
+
+function BulletItem({ bullet }: { bullet: Bullet }) {
+  if (typeof bullet === 'string') return <li>{bullet}</li>
+  return (
+    <li>
+      <span className="resume-bullet-label label">{bullet.label}</span> {bullet.text}
+    </li>
+  )
 }
 
 export function ResumeDocument({ resume }: { resume: Resume }) {
   return (
-    <div className="resume mx-auto max-w-[72ch]">
-      <header>
-        <h1 className="text-[2.25rem]">{resume.name}</h1>
-        <p className="mt-1 text-[1.125rem] text-muted-strong">{resume.headline}</p>
-        <p className="resume-contact mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-          <span>{resume.location}</span>
-          <a href={`mailto:${resume.email}`} className="inline-flex min-h-11 items-center">
-            {resume.email}
-          </a>
+    <div className="resume">
+      <header className="resume-header">
+        <h1 className="resume-name wdth-84">{resume.name}</h1>
+        <p className="resume-headline">{resume.headline}</p>
+        <ul className="resume-contact">
+          <li>{resume.location}</li>
+          <li>
+            <a href={`mailto:${resume.email}`}>{resume.email}</a>
+          </li>
           {resume.links.map((l) => (
-            <a key={l.href} href={l.href} rel="noopener" className="inline-flex min-h-11 items-center">
-              {l.label}
-            </a>
+            <li key={l.href}>
+              <a href={l.href} rel="noopener">
+                {l.label}
+              </a>
+            </li>
           ))}
-        </p>
+        </ul>
       </header>
 
-      <section className="mt-8">
-        <h2 className="text-[1.125rem]">Summary</h2>
-        <p className="mt-2">{resume.summary}</p>
-      </section>
+      <p className="resume-summary">{resume.summary}</p>
 
-      <section className="mt-8">
-        <h2 className="text-[1.125rem]">Experience</h2>
-        <div className="mt-3 space-y-5">
-          {resume.roles.map((r) => (
-            <div key={`${r.company}-${r.title}-${r.start}`} className="role grid gap-x-6 gap-y-1 md:grid-cols-[10.5rem_1fr]">
-              <div className="text-sm text-muted">
-                <time className="tnum block">{dates(r.start, r.end)}</time>
-                {r.note && <span className="block">{r.note}</span>}
-              </div>
-              <div>
-                <p className="m-0 font-medium">
-                  {r.title}
-                  <span className="text-muted-strong">, {r.company}</span>
-                </p>
-                <p className="m-0 text-sm text-muted">{r.location}</p>
-                {r.bullets.length > 0 && (
-                  <ul className="mt-2 list-disc space-y-1 pl-5">
-                    {r.bullets.map((b) => (
-                      <li key={b.slice(0, 32)}>{b}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {resume.education.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-[1.125rem]">Education</h2>
-          <div className="mt-3 space-y-3">
-            {resume.education.map((e) => (
-              <div key={`${e.school}-${e.program}`} className="role grid gap-x-6 gap-y-1 md:grid-cols-[10.5rem_1fr]">
-                <time className="tnum text-sm text-muted">{dates(e.start, e.end)}</time>
-                <div>
-                  <p className="m-0 font-medium">{e.program}</p>
-                  <p className="m-0 text-sm text-muted">
-                    {e.school}
-                    {e.note ? `. ${e.note}` : ''}
-                  </p>
-                </div>
-              </div>
-            ))}
+      <dl className="resume-facts">
+        {resume.facts.map((f) => (
+          <div key={f.label} className="resume-fact">
+            <dt className="label">{f.label}</dt>
+            <dd className="resume-fact-value tnum">
+              {f.value}
+              {f.note && <span className="resume-fact-note">{f.note}</span>}
+            </dd>
           </div>
-        </section>
-      )}
+        ))}
+      </dl>
 
-      <section className="resume-skills mt-8">
-        <h2 className="text-[1.125rem]">Skills</h2>
-        <dl className="mt-3 grid gap-x-6 gap-y-2 md:grid-cols-[10.5rem_1fr]">
+      <section className="resume-section">
+        <h2 className="resume-section-title label">Experience</h2>
+        {resume.roles.map((r) => (
+          <article key={`${r.company}-${r.title}-${r.start}`} className="resume-role">
+            <DateRail role={r} />
+            <div className="resume-role-body">
+              <h3 className="resume-role-title">{r.title}</h3>
+              <p className="resume-role-meta">
+                <span className="resume-role-company">{r.company}</span>
+                <span>{r.location}</span>
+                {r.note && <span>{r.note}</span>}
+              </p>
+              {r.bullets.length > 0 && (
+                <ul className="resume-bullets">
+                  {r.bullets.map((b) => (
+                    <BulletItem key={typeof b === 'string' ? b.slice(0, 32) : b.label} bullet={b} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="resume-section">
+        <h2 className="resume-section-title label">Skills</h2>
+        <dl className="resume-skills">
           {resume.skills.map((g) => (
-            <div key={g.label} className="contents">
-              <dt className="text-sm text-muted">{g.label}</dt>
-              <dd className="m-0">{g.items.join(', ')}</dd>
+            <div key={g.label} className="resume-skill">
+              <dt className="label">{g.label}</dt>
+              <dd>{g.items.join(', ')}</dd>
             </div>
           ))}
         </dl>

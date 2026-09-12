@@ -14,8 +14,10 @@ export function period(start: string, end: string | null): string {
   return `${from} to ${monthYear(end)}`
 }
 
-/** '2026-09-11' becomes 'September 11, 2026'. */
-export function longDate(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return `${MONTHS[m - 1]} ${d}, ${y}`
+const SHORT = MONTHS.map((m) => m.slice(0, 3))
+
+/** '2026-04' becomes 'Apr 2026': the resume's date rail is three letters wide. */
+export function monthYearShort(ym: string): string {
+  const [y, m] = ym.split('-').map(Number)
+  return `${SHORT[m - 1]} ${y}`
 }

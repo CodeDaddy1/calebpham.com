@@ -71,6 +71,7 @@ async function main() {
     const page = await browser.newPage()
     await page.goto(`http://localhost:${port}/resume`, { waitUntil: 'networkidle' })
     await page.emulateMedia({ media: 'print' })
+    await page.waitForTimeout(400) // let any screen transition settle before colours are read
     // The print palette must actually apply: every piece of resume text has to
     // compute to a dark ink on paper. A print override on a weaker selector
     // than :root once lost to the screen tokens and shipped grey secondary text.

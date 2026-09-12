@@ -3,14 +3,13 @@ import { SITE } from '@/lib/site'
 import { Clock } from './clock'
 import { NavMenu } from './nav-menu'
 
-// The fixed header on every page: name, the Houston clock, and five small
+// The fixed header on every page: name, the Houston clock, and four small
 // tracked links. Above 760px the links sit inline; below, they collapse into
 // a native disclosure menu. `overVideo` makes it transparent over the home
 // page's stage; everywhere else it is solid on the ground with a hairline.
 
 const LINKS = [
   ['/work', 'Work'],
-  ['/notes', 'Notes'],
   ['/about', 'About'],
   ['/resume', 'Resume'],
 ] as const

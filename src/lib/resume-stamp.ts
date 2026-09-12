@@ -9,11 +9,14 @@ import { readFileSync } from 'node:fs'
 
 const ROOT = new URL('../../', import.meta.url).pathname
 
-/** The @media print block of globals.css, the only styling the PDF sees. */
+/** The resume's own styling: its screen rules (which the printed page also
+ *  uses for the facts strip and the rails) and the @media print block that
+ *  follows them, together the tail of globals.css. */
 function printBlock(): string {
   const css = readFileSync(`${ROOT}src/app/globals.css`, 'utf-8')
-  const at = css.indexOf('@media print')
-  return at >= 0 ? css.slice(at) : ''
+  const at = css.indexOf('/* Resume (src/components/resume/resume-document.tsx)')
+  const fallback = css.indexOf('@media print')
+  return css.slice(at >= 0 ? at : Math.max(fallback, 0))
 }
 
 export function resumeStamp(): string {
