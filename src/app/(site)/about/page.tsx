@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <PageBand label="About" title={SITE.name} lede={`${SITE.title}. ${SITE.location}.`} />
+      <PageBand label="About" title={SITE.name} banner="about" lede={`${SITE.title}. ${SITE.location}.`} />
       <Container className="py-12 sm:py-16">
         <div className="grid gap-10 md:grid-cols-[280px_1fr] md:gap-16">
           <Image

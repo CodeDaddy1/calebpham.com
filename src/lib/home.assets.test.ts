@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 import { CHAPTERS, posterSrc, videoSrc } from './home'
+import { BANNERS, bannerSrc, type BannerSlug } from './banners'
 
 const PUBLIC = fileURLToPath(new URL('../../public', import.meta.url))
 const file = (url: string) => `${PUBLIC}${url}`
@@ -103,6 +104,37 @@ describe('the inner-page band', () => {
     const m = css.match(/--band-scrim:\s*rgba\(11, 11, 11, ([\d.]+)\)/)
     expect(m, '--band-scrim must be rgba(11, 11, 11, a)').toBeTruthy()
     expect(Number(m![1])).toBe(BAND_ALPHA)
+  })
+})
+
+describe('the inner-page banners (src/lib/banners.ts)', () => {
+  // Each committed Pexels photo sits under the same flat scrim as the city
+  // poster; the heading is --foreground and the lede --muted-strong.
+  const BAND_ALPHA = 0.76
+  const MUTED_STRONG = [0xc9, 0xc9, 0xc9] as const
+  const slugs = Object.keys(BANNERS) as BannerSlug[]
+
+  it('has a banner for every inner page', () => {
+    expect(slugs.sort()).toEqual(['about', 'lumaiq', 'mdcb-study', 'not-found', 'resume', 'the-ninth-room', 'work'])
+  })
+
+  describe.each(slugs)('%s', (slug) => {
+    it('has both files, under budget', () => {
+      const big = file(bannerSrc(slug, 1600))
+      const small = file(bannerSrc(slug, 900))
+      expect(existsSync(big), `${big} is missing: node --env-file=tmp/.env.pexels scripts/fetch-banners.mjs`).toBe(true)
+      expect(existsSync(small)).toBe(true)
+      expect(statSync(big).size).toBeLessThanOrEqual(CAP.poster1600)
+      expect(statSync(small).size).toBeLessThanOrEqual(CAP.poster900)
+    })
+
+    it('keeps the heading and the lede readable under the scrim', async () => {
+      const worst = await worstUnderFlatScrim(file(bannerSrc(slug, 900)), BAND_ALPHA)
+      const ink = contrast(INK_LUM, worst)
+      const lede = contrast(luminance(...MUTED_STRONG), worst)
+      expect(ink, `#EDEDED on the ${slug} banner is ${ink.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+      expect(lede, `#C9C9C9 on the ${slug} banner is ${lede.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+    })
   })
 })
 

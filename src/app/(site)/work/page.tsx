@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function WorkPage() {
   return (
     <>
-      <PageBand label="Work" title="Case studies" lede="What was built, the decisions behind it, and what breaks if they are wrong." />
+      <PageBand label="Work" title="Case studies" banner="work" lede="What was built, the decisions behind it, and what breaks if they are wrong." />
       <Container className="py-12 sm:py-16">
         <ol className="projects list-none p-0" style={{ marginTop: 0 }}>
           {publishedProjects().map((p, i) => (
