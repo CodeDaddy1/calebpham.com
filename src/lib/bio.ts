@@ -4,15 +4,15 @@
 // dedication, perseverance and passion"); nobody edits it but him. Facts: self-taught since the pandemic,
 // school paused to work full time while his wife trained as a medical
 // dosimetrist (two bachelor's degrees, her dream of helping cancer
-// patients), MDCB Study built for her board exam, store desk to area
-// manager for six properties in two Texas markets, golf, the horns.
+// patients), MDCB Study built for her board exam, property manager of a Class A
+// facility to area manager for six properties in two Texas markets, golf, the horns.
 
 export const BIO: readonly string[] = [
-  "Building things is the constant. In high school I taught myself trumpet and French horn by ear, mapping the notes out on a piano until I could play back what I heard. Programming started the same way during the pandemic, one problem at a time, and I enjoyed every minute of it.",
-  "I went to school for software engineering, then set it down to work full time so my wife could finish two bachelor's degrees and become a medical dosimetrist, her dream of helping cancer patients. MDCB Study was built for her board exam. Twice I chose work over school, and both times I kept building on the side.",
-  "Storage was my first real job and I poured everything into it: a store desk, then area manager for six properties across Texas within a year, between the store teams and the head of operations. I saw the problems on both ends and carried the numbers between them.",
-  "LumaIQ is that bridge as software. I built it alone, by hand first, the way I closed the month before I automated it, and I stay on a problem until it holds.",
-  "Away from the desk it is golf. At one point I was at the range most days, every swing an iteration, improving over time. That is the method.",
+  "I have always taught myself the things I care about. In high school it was the trumpet and the French horn, by ear, every note mapped out on a piano until I could play back what I heard. Programming found me during the pandemic, the same work with a different instrument, and I have loved every minute of it.",
+  "I went to school for software engineering and set it down twice: first so my wife could finish two bachelor's degrees and become a medical dosimetrist, her dream of helping cancer patients (MDCB Study was built for her board exam), then when a promotion came with overtime every week. Both times I kept building on the side.",
+  "Self-storage was my first real job and I gave it everything. As property manager of a Class A facility I moved the numbers that mattered, and within a year I was area manager for six properties across Texas, in the operations leadership group, between the store teams and the head of operations.",
+  "I saw the problems on both ends and carried the numbers between them. Some gave way and some did not, and the ones that did not are what I kept thinking about after hours. LumaIQ is that thinking as software: built alone, by hand first, the way I closed the month before I automated it.",
+  "Away from the desk it is golf. For a while I was at the range most days, and every swing was what every commit is: one more iteration, a little better than the last. I finish what I start, alone if that is what it takes.",
 ]
 
 /** Two lines he puts his name under, shown as hairline rows under the bio. */

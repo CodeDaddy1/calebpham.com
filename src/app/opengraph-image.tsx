@@ -11,7 +11,7 @@ export const alt = `${SITE.name}, ${SITE.title}`
 export default function Image() {
   return ogImage({
     eyebrow: SITE.title,
-    title: 'The bridge between the store desk and the home office, built in software.',
+    title: 'The bridge between the store teams and the home office, built in software.',
     subtitle: SITE.description,
     tags: [SITE.location],
   })

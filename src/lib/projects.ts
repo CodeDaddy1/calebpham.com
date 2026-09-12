@@ -32,9 +32,9 @@ export const PROJECTS: readonly Project[] = [
   {
     slug: 'lumaiq',
     name: 'LumaIQ',
-    tagline: 'Asset management software for self-storage operators, from the store desk to the home office.',
+    tagline: 'Asset management software for self-storage operators, from the store teams to the home office.',
     blurb:
-      'Asset management for self-storage operators: rate increases, the lien clock, owner reports and the month-end close, from the store desk to the home office.',
+      'Asset management for self-storage operators: rate increases, the lien clock, owner reports and the month-end close, from the store teams to the home office.',
     facts: [
       ['Suite', '2,453 tests in 176 files, on every push'],
       ['Tenancy', 'Postgres with row-level security as the boundary'],

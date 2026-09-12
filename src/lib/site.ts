@@ -40,5 +40,5 @@ export const SITE = {
   email: 'caleb@lumaiq.dev',
   linkedin: 'https://www.linkedin.com/in/caleb-pham-1b8464252',
   description:
-    'Founder and software engineer in Houston. Six storage properties in two Texas markets, then LumaIQ, built alone: the bridge between store desk and home office.',
+    'Founder and software engineer in Houston. Six storage properties in two Texas markets, then LumaIQ, built alone: the bridge between store teams and home office.',
 } as const
