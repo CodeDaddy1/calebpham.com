@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Container } from '@/components/container'
+import { PageBand } from '@/components/page-band'
 import { Reveal } from '@/components/reveal'
 import { getProject, publishedProjects } from '@/lib/projects'
 import { period } from '@/lib/dates'
@@ -35,46 +35,32 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   if (!p) notFound()
   const { default: Body } = await import(`@/content/work/${slug}.mdx`)
 
+  const facts: [string, string][] = [
+    ['Role', p.role],
+    ['Period', period(p.period.start, p.period.end)],
+    ['Stack', p.stack.join(', ')],
+    ...(p.facts ?? []),
+  ]
+
   return (
-    <Container className="py-14 sm:py-20">
-      <article data-swatch={p.slug}>
-        <Reveal />
-        <header className="swatch-rule max-w-[45rem] pt-6">
-          <p className="label text-swatch-ink">Case study</p>
-          <h1 className="mt-3">{p.name}</h1>
-          <p className="mt-4 text-[1.125rem] text-muted-strong">{p.tagline}</p>
-          <dl className="mt-8 grid gap-x-8 gap-y-3 border-t border-line pt-4 text-sm sm:grid-cols-[8rem_1fr]">
-            <dt className="label">Role</dt>
-            <dd className="m-0">{p.role}</dd>
-            <dt className="label">Period</dt>
-            <dd className="m-0 tnum">{period(p.period.start, p.period.end)}</dd>
-            <dt className="label">Stack</dt>
-            <dd className="m-0">{p.stack.join(', ')}</dd>
-            {(p.links.live || p.links.repo) && (
-              <>
-                <dt className="label">Links</dt>
-                <dd className="m-0 flex flex-wrap gap-4">
-                  {p.links.live && (
-                    <a href={p.links.live} rel="noopener" className="inline-flex min-h-11 items-center text-accent underline underline-offset-4">
-                      Live site
-                    </a>
-                  )}
-                  {p.links.repo && (
-                    <a href={p.links.repo} rel="noopener" className="inline-flex min-h-11 items-center text-accent underline underline-offset-4">
-                      Repository
-                    </a>
-                  )}
-                </dd>
-              </>
-            )}
-            {(p.facts ?? []).map(([label, value]) => (
-              <Fragment key={label}>
-                <dt className="label">{label}</dt>
-                <dd className="m-0">{value}</dd>
-              </Fragment>
-            ))}
-          </dl>
-        </header>
+    <article data-swatch={p.slug}>
+      <Reveal />
+      <PageBand label="Case study" title={p.name} lede={p.tagline} className="band-swatch">
+        {p.links.live && (
+          <a href={p.links.live} rel="noopener" className="label nav-link band-link">
+            Live site <span aria-hidden="true">→</span>
+          </a>
+        )}
+      </PageBand>
+      <Container className="py-12 sm:py-16">
+        <dl className="facts-strip" data-reveal>
+          {facts.map(([label, value], i) => (
+            <div key={label} className="facts-cell" style={{ '--i': i } as React.CSSProperties}>
+              <dt className="label">{label}</dt>
+              <dd className="m-0">{value}</dd>
+            </div>
+          ))}
+        </dl>
         <div className="prose article-body mt-12 max-w-none">
           <Body />
         </div>
@@ -83,7 +69,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
             All case studies <span aria-hidden="true">→</span>
           </Link>
         </p>
-      </article>
-    </Container>
+      </Container>
+    </article>
   )
 }

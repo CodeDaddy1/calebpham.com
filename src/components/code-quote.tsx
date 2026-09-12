@@ -18,10 +18,10 @@ export interface CodeQuoteProps {
 
 export function CodeQuote({ file, lines, href, children }: CodeQuoteProps) {
   return (
-    <figure className="wide my-8">
-      <figcaption className="mb-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-sm text-muted">
-        <span className="text-muted-strong">{file}</span>
-        <span>lines {lines}</span>
+    <figure className="wide my-8 code-quote" data-reveal>
+      <figcaption className="code-quote-bar">
+        <span className="label code-quote-file">{file}</span>
+        <span className="label">lines {lines}</span>
         {href && (
           <a href={href} rel="noopener" className="text-accent underline underline-offset-4">
             view at this commit

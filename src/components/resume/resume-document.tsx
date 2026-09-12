@@ -35,7 +35,8 @@ function BulletItem({ bullet }: { bullet: Bullet }) {
 export function ResumeDocument({ resume }: { resume: Resume }) {
   return (
     <div className="resume">
-      <header className="resume-header">
+      {/* On screen the page band above carries this; in print the band is hidden and this stands. */}
+      <header className="resume-header" data-screen-hide>
         <h1 className="resume-name wdth-84">{resume.name}</h1>
         <p className="resume-headline">{resume.headline}</p>
         <ul className="resume-contact">
@@ -53,11 +54,13 @@ export function ResumeDocument({ resume }: { resume: Resume }) {
         </ul>
       </header>
 
-      <p className="resume-summary">{resume.summary}</p>
+      <p className="resume-summary" data-reveal>
+        {resume.summary}
+      </p>
 
-      <dl className="resume-facts">
-        {resume.facts.map((f) => (
-          <div key={f.label} className="resume-fact">
+      <dl className="resume-facts" data-reveal>
+        {resume.facts.map((f, i) => (
+          <div key={f.label} className="resume-fact" style={{ '--i': i } as React.CSSProperties}>
             <dt className="label">{f.label}</dt>
             <dd className="resume-fact-value tnum">
               {f.value}
@@ -68,9 +71,11 @@ export function ResumeDocument({ resume }: { resume: Resume }) {
       </dl>
 
       <section className="resume-section">
-        <h2 className="resume-section-title label">Experience</h2>
-        {resume.roles.map((r) => (
-          <article key={`${r.company}-${r.title}-${r.start}`} className="resume-role">
+        <h2 className="resume-section-title label" data-reveal>
+          Experience
+        </h2>
+        {resume.roles.map((r, i) => (
+          <article key={`${r.company}-${r.title}-${r.start}`} className="resume-role" data-reveal style={{ '--i': i } as React.CSSProperties}>
             <DateRail role={r} />
             <div className="resume-role-body">
               <h3 className="resume-role-title">{r.title}</h3>
@@ -92,10 +97,12 @@ export function ResumeDocument({ resume }: { resume: Resume }) {
       </section>
 
       <section className="resume-section">
-        <h2 className="resume-section-title label">Skills</h2>
+        <h2 className="resume-section-title label" data-reveal>
+          Skills
+        </h2>
         <dl className="resume-skills">
-          {resume.skills.map((g) => (
-            <div key={g.label} className="resume-skill">
+          {resume.skills.map((g, i) => (
+            <div key={g.label} className="resume-skill" data-reveal style={{ '--i': i } as React.CSSProperties}>
               <dt className="label">{g.label}</dt>
               <dd>{g.items.join(', ')}</dd>
             </div>

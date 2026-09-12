@@ -38,15 +38,19 @@ export async function pageAll<T>(build: () => Pageable): Promise<T[]> {
 
 </CodeQuote>
 
-<Figure src="/work/lumaiq/01-owner-reports.webp" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Owner Reports, the desk this helper reads for: the whole portfolio, not the first thousand rows. City Storage demo tenant, no client data." />
+<Figure src="/work/lumaiq/01-owner-reports.webp" title="Owner Reports · City Storage demo" alt="LumaIQ Owner Reports for July 2026 in the City Storage demo tenant: seventeen stores listed, figures in for eleven of fourteen, each store marked Missing PDFs, Manual fields, Needs owner contact, or Ready to send." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Owner Reports, the desk this helper reads for: the whole portfolio, not the first thousand rows. City Storage demo tenant, no client data." />
 
 </Paired>
+
+<Notes>
 
 **Decision.** A read of a table that can pass a thousand rows is either explicitly bounded or goes through this helper, which takes a function that builds a fresh query, because a consumed PostgREST builder would return the first page forever.
 
 **Measurement.** Supabase's PostgREST caps a select at 1,000 rows by default and answers success when it truncates. The helper pages by 1,000, stops on the first short page, refuses to pass 50,000 rows, and a test fails any uncapped read of a watched table.
 
 **What breaks if wrong.** A total that omits the oldest months, a ranking built on part of a portfolio, an "all properties" list that is not all properties. Nothing crashes; somebody acts on a number that is quietly too low.
+
+</Notes>
 
 ## The lien clock is a calendar day
 
@@ -95,12 +99,16 @@ export function stageDueOn(since: string, stage: LienStage): string {
 
 </CodeQuote>
 
-<Figure src="/work/lumaiq/03-delinquency-lien.webp" alt="LumaIQ Delinquency and Lien in the City Storage demo tenant: four units late across all stores, two behind on the ladder, three at a notice stage, 635 dollars of monthly rent at risk, and a lien calendar that groups each unit under the step it is due for, from a certified letter and a late notice that are overdue to an overlock due in one day and a notice of sale due in three." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Delinquency and Lien, the desk this schedule drives: every date computed from the day the unit's clock started. City Storage demo tenant, no client data." />
+<Figure src="/work/lumaiq/03-delinquency-lien.webp" title="Delinquency and Lien · City Storage demo" alt="LumaIQ Delinquency and Lien in the City Storage demo tenant: four units late across all stores, two behind on the ladder, three at a notice stage, 635 dollars of monthly rent at risk, and a lien calendar that groups each unit under the step it is due for, from a certified letter and a late notice that are overdue to an overlock due in one day and a notice of sale due in three." width={1600} height={1000} sizes="(min-width: 64rem) 400px, 100vw" caption="Delinquency and Lien, the desk this schedule drives: every date computed from the day the unit's clock started. City Storage demo tenant, no client data." />
 
 </Paired>
+
+<Notes>
 
 **Decision.** The lien clock is anchored to a fixed calendar day, not a rolling count: a rent roll's days-past-due is stale the moment the roll is a day old, but the day the clock started is not.
 
 **Measurement.** On the as-of date the days past due reproduce the roll's own whole-day count, and every step is added in whole days in UTC, so a daylight-saving boundary or a leap year cannot move a deadline.
 
 **What breaks if wrong.** A notice date that shifts because nobody uploaded a roll this week, and a manager held to a deadline that moved under them. In a lien process the deadline is statutory, so a wrong date is a sale that can be challenged.
+
+</Notes>

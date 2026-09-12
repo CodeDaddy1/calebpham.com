@@ -15,7 +15,7 @@
 // WHAT BREAKS IF THIS IS WRONG: a bright sky behind the headline. The fix is
 // the scrim's 40 percent stop or a different frame, never a lighter ink.
 
-import { existsSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
@@ -68,6 +68,43 @@ async function worstLuminance(path: string, stops: readonly [number, number, num
   lums.sort((a, b) => a - b)
   return lums[Math.floor(lums.length * 0.95)]
 }
+
+/** The inner-page band: the whole frame under the flat --band-scrim (0.76 of #0B0B0B). */
+async function worstUnderFlatScrim(path: string, alpha: number): Promise<number> {
+  const { data, info } = await sharp(path).resize(400).raw().toBuffer({ resolveWithObject: true })
+  const { width, height, channels } = info
+  const lums: number[] = []
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * channels
+      const keep = 1 - alpha
+      lums.push(luminance(data[i] * keep + 11 * alpha, data[i + 1] * keep + 11 * alpha, data[i + 2] * keep + 11 * alpha))
+    }
+  }
+  lums.sort((a, b) => a - b)
+  return lums[Math.floor(lums.length * 0.95)]
+}
+
+describe('the inner-page band', () => {
+  // src/components/page-band.tsx puts the label, heading and lede over the
+  // city poster under --band-scrim; the lede is --muted-strong, so both inks
+  // are measured against the brightest five percent of the whole frame.
+  const BAND_ALPHA = 0.76
+  const MUTED_STRONG = [0xc9, 0xc9, 0xc9] as const
+  it('keeps the heading and the lede readable over the city poster', async () => {
+    const worst = await worstUnderFlatScrim(file(posterSrc('city', 900)), BAND_ALPHA)
+    const ink = contrast(INK_LUM, worst)
+    const lede = contrast(luminance(...MUTED_STRONG), worst)
+    expect(ink, `#EDEDED on the band is ${ink.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+    expect(lede, `#C9C9C9 on the band is ${lede.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+  })
+  it('matches the alpha globals.css declares', () => {
+    const css = readFileSync(fileURLToPath(new URL('../app/globals.css', import.meta.url)), 'utf-8')
+    const m = css.match(/--band-scrim:\s*rgba\(11, 11, 11, ([\d.]+)\)/)
+    expect(m, '--band-scrim must be rgba(11, 11, 11, a)').toBeTruthy()
+    expect(Number(m![1])).toBe(BAND_ALPHA)
+  })
+})
 
 describe.each(CHAPTERS)('chapter $id', (c) => {
   it('has both posters, under budget', () => {
