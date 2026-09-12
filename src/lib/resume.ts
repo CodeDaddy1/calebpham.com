@@ -5,7 +5,7 @@
 //
 // Source: Caleb's own account on 2026-09-12 (the plan's interview record).
 // The only management figures he allows are six properties, two Texas
-// markets, roughly 3,000 units and roughly 350,000 square feet; the earlier
+// markets, 3,000 units and 350,000 square feet, stated plainly; the earlier
 // draft's revenue, occupancy, unit count and team size are retired and
 // src/content/facts.test.ts refuses them. House diction: no dashes, no
 // exclamation marks, numbers in full, "to" for ranges, "and" not "&". No
@@ -32,7 +32,7 @@ export interface Fact {
   label: string
   /** The figure or a short phrase; set in tabular figures. */
   value: string
-  /** A quiet qualifier under the figure: "roughly", "on every push". */
+  /** A quiet qualifier under the figure: "Texas", "on every push". */
   note?: string
 }
 
@@ -63,15 +63,14 @@ export const RESUME: Resume = {
   links: [
     { label: 'calebpham.com', href: 'https://calebpham.com' },
     { label: 'linkedin.com/in/caleb-pham-1b8464252', href: 'https://www.linkedin.com/in/caleb-pham-1b8464252' },
-    { label: 'github.com/CodeDaddy1', href: 'https://github.com/CodeDaddy1' },
   ],
   summary:
     'Area manager for six self-storage properties in two Texas markets, the bridge between the store teams and the head of operations. LumaIQ is that bridge as software, built alone from concept through production.',
   facts: [
     { label: 'Properties', value: '6' },
     { label: 'Markets', value: '2', note: 'Texas' },
-    { label: 'Units', value: '3,000', note: 'roughly' },
-    { label: 'Square feet', value: '350,000', note: 'roughly' },
+    { label: 'Units', value: '3,000' },
+    { label: 'Square feet', value: '350,000' },
     { label: 'Engineering', value: 'Sole engineer' },
     { label: 'Tests', value: '2,453', note: 'on every push' },
   ],

@@ -53,14 +53,14 @@ export const PROJECTS: readonly Project[] = [
     blurb:
       'A Python pipeline that carries raw footage to a cut timeline in DaVinci Resolve, run from one machine.',
     facts: [
-      ['Commits', '271, public'],
+      ['Commits', '271'],
       ['Tests', '75 files, standard-library unittest'],
     ],
     role: 'Sole engineer',
     period: { start: '2026-06', end: null },
     stack: ['Python 3.9', 'ffmpeg', 'faster-whisper', 'Pillow', 'DaVinci Resolve scripting'],
     status: 'published',
-    links: { repo: 'https://github.com/CodeDaddy1/the-ninth-room' },
+    links: {},
   },
   {
     slug: 'mdcb-study',
@@ -76,7 +76,7 @@ export const PROJECTS: readonly Project[] = [
     period: { start: '2026-06', end: '2026-06' },
     stack: ['Next.js 16', 'TypeScript', 'Supabase Postgres', 'pgvector', 'Anthropic'],
     status: 'published',
-    links: { repo: 'https://github.com/CodeDaddy1/MDCB_Study' },
+    links: {},
   },
 ]
 
