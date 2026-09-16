@@ -4,9 +4,9 @@
 //
 // Run:  npx tsx scripts/audit-headers.ts --url=https://calebpham.com [--motion=reduce|no-preference]
 //
-// Pass 1 fetches every sitemap route, the 404, the resume PDF and a poster
-// file, and compares headers to the module, so the test suite's pin and the
-// live site are the same thing. Pass 2 loads every HTML
+// Pass 1 fetches every sitemap route, the 404, the resume PDF, a poster
+// file and security.txt, and compares headers to the module, so the test
+// suite's pin and the live site are the same thing. Pass 2 loads every HTML
 // route in both engines with a securitypolicyviolation listener installed
 // before any page script runs; --motion=no-preference mounts the clips so
 // media-src is exercised too. A probe path is fetched last and its status
@@ -50,6 +50,7 @@ async function pass1(routes: string[]): Promise<string[]> {
     ['/does-not-exist', { status: 404, type: 'text/html' }],
     ['/Caleb-Pham-Resume.pdf', { status: 200, type: 'application/pdf' }],
     ['/video/about-poster-900.webp', { status: 200, type: 'image/webp', cache: IMMUTABLE }],
+    ['/.well-known/security.txt', { status: 200, type: 'text/plain' }],
   ]
   for (const [path, want] of targets) {
     const res = await fetch(`${base}${path}`, { redirect: 'manual' })

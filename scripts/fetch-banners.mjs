@@ -3,7 +3,9 @@
 //   node --env-file=tmp/.env.pexels scripts/fetch-banners.mjs --candidates      list the top results per query as small JPEGs under tmp/banners/
 //   node --env-file=tmp/.env.pexels scripts/fetch-banners.mjs                   download the chosen ids, write the WebPs and src/lib/banners.ts
 //
-// PEXELS_KEY is the Vercel variable of the same name. The photos are committed
+// PEXELS_KEY is a free key from pexels.com/api in the local file above and
+// nowhere else; it was removed from the Vercel project on 2026-09-16 because
+// nothing at build or run time reads it. The photos are committed
 // as WebP (1600 and 900 wide, under the same budgets as the home posters) so
 // the site never calls Pexels at build or run time, the contrast test in
 // src/lib/home.assets.test.ts can measure each frame under the band's scrim,
@@ -20,7 +22,7 @@ const TMP = join(ROOT, 'tmp/banners')
 mkdirSync(OUT, { recursive: true })
 mkdirSync(TMP, { recursive: true })
 const KEY = process.env.PEXELS_KEY
-if (!KEY) { console.error('PEXELS_KEY is not set (pull it with `vercel env pull`)'); process.exit(1) }
+if (!KEY) { console.error('PEXELS_KEY is not set: put a key from pexels.com/api in tmp/.env.pexels and run with --env-file'); process.exit(1) }
 const CANDIDATES = process.argv.includes('--candidates')
 const CAPS = { 1600: 160 * 1024, 900: 70 * 1024 }
 

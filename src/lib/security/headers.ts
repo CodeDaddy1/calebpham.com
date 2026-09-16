@@ -41,7 +41,7 @@ export function cspDirectives(env: SecurityEnv): Record<string, string[]> {
     'img-src': ["'self'"],
     'font-src': ["'self'"],
     'media-src': ["'self'"],
-    // The analytics beacon is /_vercel/insights/event on this origin. HMR is a websocket in development.
+    // Vercel serves the analytics script and its beacon from this origin (a per-project path). HMR is a websocket in development.
     'connect-src': ["'self'", ...(dev ? ['ws://localhost:*', 'ws://127.0.0.1:*'] : [])],
     'frame-src': ["'none'"],
     'frame-ancestors': ["'none'"],
