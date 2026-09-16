@@ -13,14 +13,16 @@ export const metadata: Metadata = {
   openGraph: { url: '/about' },
 }
 
-// The bio is BIO, in Caleb's words, in order, nothing added; the two beliefs
-// under it are BELIEFS, stated once, here. The portrait is the only headshot
-// on file (600 by 800); it renders at a fixed 280 CSS px so 2x is 560 and
-// never asks for more than the source has.
+// The band plays the About clip (a generated Caleb in a Houston office at
+// dusk, under the darker video scrim) where the footage gate allows, and its
+// 5.0 s frame everywhere else. The bio is BIO, in Caleb's words, in order,
+// nothing added; the two beliefs under it are BELIEFS, stated once, here. The
+// portrait is the only headshot on file (600 by 800); it renders at a fixed
+// 280 CSS px so 2x is 560 and never asks for more than the source has.
 export default function AboutPage() {
   return (
     <>
-      <PageBand label="About" title={SITE.name} banner="about" lede={`${SITE.title}. ${SITE.location}.`} />
+      <PageBand label="About" title={SITE.name} video="about" lede={`${SITE.title}. ${SITE.location}.`} />
       <Container className="py-12 sm:py-16">
         <div className="grid gap-10 md:grid-cols-[280px_1fr] md:gap-16">
           <Image

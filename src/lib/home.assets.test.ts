@@ -1,6 +1,6 @@
-// The home page's stage assets: every poster exists and is under budget,
-// every encoded clip (once a chapter's video is on) is under 4 MB, and the
-// design's text stays readable over the real footage.
+// The site's footage: every poster exists and is under budget, every encoded
+// clip (once a chapter's video is on, and the About band's) is under 4 MB,
+// and the design's text stays readable over the real footage.
 //
 // That last one is the measurement nothing else can make. The rendered-DOM
 // contrast sweep walks ancestors, and the video is a fixed sibling layer, so
@@ -19,7 +19,8 @@ import { existsSync, readFileSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
-import { CHAPTERS, posterSrc, videoSrc } from './home'
+import { CHAPTERS } from './home'
+import { posterSrc, videoSrc } from './clips'
 import { BANNERS, bannerSrc, type BannerSlug } from './banners'
 
 const PUBLIC = fileURLToPath(new URL('../../public', import.meta.url))
@@ -135,6 +136,50 @@ describe('the inner-page banners (src/lib/banners.ts)', () => {
       expect(ink, `#EDEDED on the ${slug} banner is ${ink.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
       expect(lede, `#C9C9C9 on the ${slug} banner is ${lede.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
     })
+  })
+})
+
+describe('the About band clip', () => {
+  // src/app/(site)/about/page.tsx plays the About clip behind its band under
+  // --band-scrim-video, darker than the page band's scrim to hide the
+  // generated clip's flaws. The poster is the 5.0 s frame; the brightest of
+  // 32 frames sampled across the clip measured 8.9:1 for #EDEDED under the
+  // lighter 0.76 scrim on 2026-09-16, so the frame stands for the clip.
+  const VIDEO_ALPHA = 0.84
+  const MUTED_STRONG = [0xc9, 0xc9, 0xc9] as const
+
+  it('has both posters, under budget', () => {
+    const big = file(posterSrc('about', 1600))
+    const small = file(posterSrc('about', 900))
+    expect(existsSync(big), `${big} is missing: node scripts/encode-video.mjs --chapter=about`).toBe(true)
+    expect(existsSync(small)).toBe(true)
+    expect(statSync(big).size).toBeLessThanOrEqual(CAP.poster1600)
+    expect(statSync(small).size).toBeLessThanOrEqual(CAP.poster900)
+  })
+
+  it('has both encodes under 4 MB', () => {
+    for (const ext of ['mp4', 'webm'] as const) {
+      const path = file(videoSrc('about', ext))
+      expect(existsSync(path), `${path} is missing: node scripts/encode-video.mjs --chapter=about`).toBe(true)
+      expect(statSync(path).size, `${path} is over 4 MB`).toBeLessThanOrEqual(CAP.video)
+    }
+  })
+
+  it('keeps the heading and the lede readable under the video scrim', async () => {
+    const worst = await worstUnderFlatScrim(file(posterSrc('about', 900)), VIDEO_ALPHA)
+    const ink = contrast(INK_LUM, worst)
+    const lede = contrast(luminance(...MUTED_STRONG), worst)
+    expect(ink, `#EDEDED on the About band is ${ink.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+    expect(lede, `#C9C9C9 on the About band is ${lede.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
+  })
+
+  it('matches the alpha globals.css declares, darker than the page band', () => {
+    const css = readFileSync(fileURLToPath(new URL('../app/globals.css', import.meta.url)), 'utf-8')
+    const m = css.match(/--band-scrim-video:\s*rgba\(11, 11, 11, ([\d.]+)\)/)
+    expect(m, '--band-scrim-video must be rgba(11, 11, 11, a)').toBeTruthy()
+    expect(Number(m![1])).toBe(VIDEO_ALPHA)
+    const band = css.match(/--band-scrim:\s*rgba\(11, 11, 11, ([\d.]+)\)/)
+    expect(Number(m![1])).toBeGreaterThan(Number(band![1]))
   })
 })
 

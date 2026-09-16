@@ -10,7 +10,9 @@
 // the ones he retired. Rows 6 (cityP) and 19 (contactP) of the earlier copy
 // table are his own lines; cityP now names both markets at his correction.
 
-export type ChapterId = 'city' | 'desk' | 'code'
+import type { ChapterId } from './clips'
+
+export type { ChapterId }
 
 export interface Chapter {
   id: ChapterId
@@ -28,9 +30,6 @@ export const CHAPTERS: readonly Chapter[] = [
   { id: 'desk', number: '02', label: 'The Desk', source: 853844, video: true },
   { id: 'code', number: '03', label: 'The Code', source: 14519236, video: true },
 ]
-
-export const videoSrc = (id: ChapterId, ext: 'mp4' | 'webm') => `/video/${id}-1080.${ext}`
-export const posterSrc = (id: ChapterId, width: 900 | 1600) => `/video/${id}-poster-${width}.webp`
 
 export interface Stat {
   label: string

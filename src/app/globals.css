@@ -54,6 +54,7 @@
      globals.contrast.test.ts pins that.                                     */
   --glass:      rgba(11, 11, 11, 0.72);
   --band-scrim: rgba(11, 11, 11, 0.76);   /* the flat scrim over an inner page's poster band; measured in home.assets.test.ts */
+  --band-scrim-video: rgba(11, 11, 11, 0.84);   /* the same scrim over a band that plays a clip: darker to hide a generated clip's flaws, not for contrast (the About frame clears AA at either) */
   --word-unlit: #7A7A7A;
 
   /* Code inks. Code sits on --card; measured on page / card:
@@ -422,8 +423,18 @@ figcaption { color: var(--muted); margin-top: 0.5rem; }
    contrast sweep measures on the ground; the poster under --band-scrim is
    measured by src/lib/home.assets.test.ts.                                   */
 .band { position: relative; overflow: hidden; background: var(--background); border-bottom: 1px solid var(--border); }
-.band-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block; }
+.band-poster, .band-video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block;
+  transition: opacity var(--dur-stage) var(--ease);
+}
 .band-scrim { position: absolute; inset: 0; background: var(--band-scrim); }
+/* A band with a clip (src/components/band-video.tsx): the video fades in over
+   the poster once it plays (data-live), both dip to the ground for the loop
+   seam (data-dip), and the scrim is the darker token. */
+.band-video { opacity: 0; }
+.band[data-live] .band-video { opacity: 1; }
+.band[data-dip] :is(.band-poster, .band-video) { opacity: 0; }
+.band[data-video] .band-scrim { background: var(--band-scrim-video); }
 .band-content {
   position: relative; max-width: 1080px; margin-inline: auto;
   padding: clamp(4.5rem, 10vw, 7.5rem) 1.25rem clamp(2.5rem, 5vw, 4rem);

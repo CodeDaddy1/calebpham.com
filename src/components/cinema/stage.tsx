@@ -1,19 +1,18 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { type Chapter, posterSrc, videoSrc } from '@/lib/home'
+import { posterSrc, videoSrc } from '@/lib/clips'
+import type { Chapter } from '@/lib/home'
+import { footageGate } from './footage'
 
 // The fixed layer behind the home page: a poster, two video elements, and the
 // scrim. Nothing here is in the server HTML but the poster, so the static page
-// never carries a video request. After mount, and only when motion is not
-// reduced, data is not being saved, the connection is not 2g, and the viewport
-// is 760px or wider, the current chapter's clip is attached and played; a
-// refused play() leaves the poster. Scrolling picks the chapter whose section
-// is nearest the viewport middle and swaps the clip through a 600ms dip to
-// black, the design's own move. Two elements mean the next clip buffers while
-// the live one fades.
-
-type Conn = { saveData?: boolean; effectiveType?: string }
+// never carries a video request. After mount, and only while the footage
+// gate (./footage.ts) allows it, the current chapter's clip is attached and
+// played; a refused play() leaves the poster. Scrolling picks the chapter
+// whose section is nearest the viewport middle and swaps the clip through a
+// 600ms dip to black, the design's own move. Two elements mean the next clip
+// buffers while the live one fades.
 
 export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
   const img = useRef<HTMLImageElement>(null)
@@ -24,13 +23,7 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
   useEffect(() => {
     const root = document.getElementById('cinema')
     if (!root) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const data = window.matchMedia('(prefers-reduced-data: reduce)')
-    const wide = window.matchMedia('(min-width: 760px)')
-    const conn = (navigator as Navigator & { connection?: Conn }).connection
-    const slow = !!conn?.saveData || conn?.effectiveType === '2g' || conn?.effectiveType === 'slow-2g'
-    const eligible = () => !reduce.matches && !data.matches && !slow && wide.matches
-    const ext = document.createElement('video').canPlayType('video/webm; codecs="vp9"') === 'probably' ? 'webm' : 'mp4'
+    const { eligible, watch, ext } = footageGate()
     const els = [a.current, b.current]
 
     let live = -1 // which video element is on screen
@@ -113,16 +106,12 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
       else if (chapters[shown].video && live < 0) start(shown)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
-    reduce.addEventListener('change', onChange)
-    data.addEventListener('change', onChange)
-    wide.addEventListener('change', onChange)
+    const unwatch = watch(onChange)
     fx()
 
     return () => {
       window.removeEventListener('scroll', onScroll)
-      reduce.removeEventListener('change', onChange)
-      data.removeEventListener('change', onChange)
-      wide.removeEventListener('change', onChange)
+      unwatch()
       if (raf) cancelAnimationFrame(raf)
       stop()
     }
