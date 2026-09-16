@@ -26,7 +26,7 @@ import { BANNERS, bannerSrc, type BannerSlug } from './banners'
 const PUBLIC = fileURLToPath(new URL('../../public', import.meta.url))
 const file = (url: string) => `${PUBLIC}${url}`
 const KB = 1024
-const CAP = { poster1600: 160 * KB, poster900: 70 * KB, video: 4 * 1024 * KB }
+const CAP = { poster1600: 160 * KB, poster900: 70 * KB, video: 4 * 1024 * KB, phone: 1.5 * 1024 * KB }
 
 /** Scrim stops as cinema.css paints them at 760px and up, per chapter: [left, 40 percent, right]. */
 const SCRIM = {
@@ -162,6 +162,17 @@ describe('the About band clip', () => {
       const path = file(videoSrc('about', ext))
       expect(existsSync(path), `${path} is missing: node scripts/encode-video.mjs --chapter=about`).toBe(true)
       expect(statSync(path).size, `${path} is over 4 MB`).toBeLessThanOrEqual(CAP.video)
+    }
+  })
+
+  // The band plays on phones (band-video.tsx passes `phones` to the gate),
+  // where the band is a third of the size, so under 760px it fetches the
+  // 720 pair the encoder's `phone` block makes.
+  it('has both phone encodes under 1.5 MB', () => {
+    for (const ext of ['mp4', 'webm'] as const) {
+      const path = file(videoSrc('about', ext, 720))
+      expect(existsSync(path), `${path} is missing: node scripts/encode-video.mjs --chapter=about`).toBe(true)
+      expect(statSync(path).size, `${path} is over 1.5 MB`).toBeLessThanOrEqual(CAP.phone)
     }
   })
 

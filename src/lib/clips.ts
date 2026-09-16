@@ -6,6 +6,8 @@
 
 export type ChapterId = 'city' | 'desk' | 'code'
 export type ClipId = ChapterId | 'about'
+/** 1080 for every clip; 720 only where the encoder's `phone` block made one. */
+export type ClipSize = 1080 | 720
 
-export const videoSrc = (id: ClipId, ext: 'mp4' | 'webm') => `/video/${id}-1080.${ext}`
+export const videoSrc = (id: ClipId, ext: 'mp4' | 'webm', size: ClipSize = 1080) => `/video/${id}-${size}.${ext}`
 export const posterSrc = (id: ClipId, width: 900 | 1600) => `/video/${id}-poster-${width}.webp`

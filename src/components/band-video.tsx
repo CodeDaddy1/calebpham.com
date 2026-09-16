@@ -13,8 +13,12 @@ import { footageGate } from './cinema/footage'
 // The clip does not loop on its own. At `ended` the band dips to the ground
 // for the design's 600ms (data-dip, the home's chapter-swap move), the clip
 // is rewound, and the dip lifts, so the cut from the last frame back to the
-// first is never on screen. If the gate closes (the window narrows, motion
-// is reduced) the source is dropped and the poster stands.
+// first is never on screen. If the gate closes (motion is reduced, data is
+// being saved) the source is dropped and the poster stands.
+//
+// Phones play too: the band is a third of the size there, so under 760px
+// the 720 encode is fetched (about 0.8 to 1.5 MB against 2.2 to 3.4 MB).
+// A resize across 760px swaps the file, from the start.
 
 const DIP = 600 // ms; globals.css --dur-stage
 
@@ -25,11 +29,11 @@ export function BandVideo({ id }: { id: ClipId }) {
     const v = ref.current
     const band = v?.closest<HTMLElement>('[data-band]')
     if (!v || !band) return
-    const { eligible, watch, ext } = footageGate()
+    const { eligible, watch, ext, size } = footageGate({ phones: true })
     let timer = 0
 
     const start = () => {
-      v.src = videoSrc(id, ext)
+      v.src = videoSrc(id, ext, size())
       v.preload = 'auto'
       v.muted = true
       v.load()
@@ -57,7 +61,7 @@ export function BandVideo({ id }: { id: ClipId }) {
     }
     const onChange = () => {
       if (!eligible()) stop()
-      else if (!v.hasAttribute('src')) start()
+      else if (v.getAttribute('src') !== videoSrc(id, ext, size())) { stop(); start() }
     }
 
     v.addEventListener('ended', onEnded)
