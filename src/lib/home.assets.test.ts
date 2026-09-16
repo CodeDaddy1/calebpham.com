@@ -226,4 +226,15 @@ describe.each(CHAPTERS)('chapter $id', (c) => {
       expect(statSync(path).size, `${path} is over 4 MB`).toBeLessThanOrEqual(CAP.video)
     }
   })
+
+  // The stage plays on phones too (stage.tsx passes `phones` to the gate)
+  // and fetches the 720 pair under 760px.
+  it('has both phone encodes under 1.5 MB when its video is on', () => {
+    if (!c.video) return
+    for (const ext of ['mp4', 'webm'] as const) {
+      const path = file(videoSrc(c.id, ext, 720))
+      expect(existsSync(path), `${path} is missing: node scripts/encode-video.mjs --chapter=${c.id} --size=720`).toBe(true)
+      expect(statSync(path).size, `${path} is over 1.5 MB`).toBeLessThanOrEqual(CAP.phone)
+    }
+  })
 })

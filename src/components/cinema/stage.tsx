@@ -9,7 +9,8 @@ import { footageGate } from './footage'
 // scrim. Nothing here is in the server HTML but the poster, so the static page
 // never carries a video request. After mount, and only while the footage
 // gate (./footage.ts) allows it, the current chapter's clip is attached and
-// played; a refused play() leaves the poster. Scrolling picks the chapter
+// played, the 720 encode under 760px and 1080 from there up; a refused
+// play() leaves the poster. Scrolling picks the chapter
 // whose section is nearest the viewport middle and swaps the clip through a
 // 600ms dip to black, the design's own move. Two elements mean the next clip
 // buffers while the live one fades.
@@ -23,8 +24,9 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
   useEffect(() => {
     const root = document.getElementById('cinema')
     if (!root) return
-    const { eligible, watch, ext } = footageGate()
+    const { eligible, watch, ext, size } = footageGate({ phones: true })
     const els = [a.current, b.current]
+    const src = (i: number) => videoSrc(chapters[i].id, ext, size())
 
     let live = -1 // which video element is on screen
     let shown = 0 // the chapter on the stage
@@ -32,7 +34,7 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
     let swapping = false
 
     const play = (v: HTMLVideoElement, i: number) => {
-      v.src = videoSrc(chapters[i].id, ext)
+      v.src = src(i)
       v.preload = 'auto'
       v.muted = true
       v.load()
@@ -101,9 +103,11 @@ export function Stage({ chapters }: { chapters: readonly Chapter[] }) {
       show(best)
     }
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(fx) }
+    // A resize across 760px changes the file a chapter wants; restart it
+    // through the same crossfade a chapter swap uses.
     const onChange = () => {
       if (!eligible()) stop()
-      else if (chapters[shown].video && live < 0) start(shown)
+      else if (chapters[shown].video && (live < 0 || els[live]?.getAttribute('src') !== src(shown))) start(shown)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     const unwatch = watch(onChange)

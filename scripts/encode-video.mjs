@@ -5,12 +5,15 @@
 //   node scripts/encode-video.mjs                  everything
 //   node scripts/encode-video.mjs --only=posters   just the WebP posters
 //   node scripts/encode-video.mjs --chapter=city   one clip
+//   node scripts/encode-video.mjs --size=720       just the phone pairs
 //
 // Outputs land in public/video/. Intermediates go to tmp/ (gitignored). The
 // originals never enter the repo; the encoded files are meant to be
-// committed, and src/lib/home.assets.test.ts holds them to a size. A clip
-// with a `phone` block is also encoded at 720p (1280 wide) for viewports
-// under 760px, where the band is drawn at a third of the size.
+// committed, and src/lib/home.assets.test.ts holds them to a size. Every
+// clip is also encoded at 720p (1280 wide) from its `phone` block, for
+// viewports under 760px; the 1080 pairs are cached immutable by URL, so
+// re-run with --size=720 when only the phone pairs are wanted and never
+// commit a re-encoded 1080 file under its old name.
 //
 // H.264 for Safari and everything else: 1080p, 24 fps for the 30 fps sources
 // and native for the 25 fps desk clip and the 24 fps About clip, no audio, a
@@ -35,6 +38,7 @@ mkdirSync(TMP, { recursive: true })
 const arg = (f) => process.argv.find((a) => a.startsWith(`--${f}=`))?.split('=').slice(1).join('=')
 const ONLY = arg('only') ?? 'all'
 const CHAPTER = arg('chapter')
+const SIZE = arg('size') ? Number(arg('size')) : null
 
 // Board order (src/lib/home.ts CHAPTERS): The City, The Desk, The Code. Then
 // the About band's clip (src/lib/clips.ts), a Higgsfield generation of Caleb
@@ -44,16 +48,20 @@ const CHAPTER = arg('chapter')
 const CLIPS = [
   // vp9: constrained quality. crf is the target, b/maxrate the cap that keeps a
   // detailed clip (the aerial city, the code screen) under the 4 MB ceiling.
-  { id: 'city', source: '18126746-uhd_3840_2160_30fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' } },
-  { id: 'desk', source: '853844-hd_1920_1080_25fps.mp4', fps: null, trim: 10, poster: 1.0, crf: 24, maxrate: '2.4M', bufsize: '4.8M', gop: 50, vp9: { b: '1.5M', maxrate: '2.4M' } },
-  { id: 'code', source: '14519236_3840_2160_60fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' } },
+  // phone: the same at 720p, its maxrate times the length under 1.5 MB.
+  { id: 'city', source: '18126746-uhd_3840_2160_30fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' },
+    phone: { crf: 23, maxrate: '2M', bufsize: '4M', vp9: { b: '1.4M', maxrate: '1.7M' } } },
+  { id: 'desk', source: '853844-hd_1920_1080_25fps.mp4', fps: null, trim: 10, poster: 1.0, crf: 24, maxrate: '2.4M', bufsize: '4.8M', gop: 50, vp9: { b: '1.5M', maxrate: '2.4M' },
+    phone: { crf: 24, maxrate: '1.1M', bufsize: '2.2M', vp9: { b: '0.6M', maxrate: '0.9M' } } },
+  { id: 'code', source: '14519236_3840_2160_60fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' },
+    phone: { crf: 23, maxrate: '1.9M', bufsize: '3.8M', vp9: { b: '1.3M', maxrate: '1.6M' } } },
   // Eight seconds at 24 fps: 3.5 Mbps caps the H.264 at 3.5 MB; the phone
   // pair at 1.4 Mbps caps it at 1.4 MB.
   { id: 'about', source: 'hf_20260916_154523_cb8c7612-a566-41bf-a9fc-02260bb2a4ce.mp4', fps: null, trim: null, poster: 5.0, crf: 23, maxrate: '3.5M', bufsize: '7M', gop: 48, vp9: { b: '2.5M', maxrate: '3M' },
     phone: { crf: 23, maxrate: '1.4M', bufsize: '2.8M', vp9: { b: '0.9M', maxrate: '1.1M' } } },
 ]
 
-/** The encode sizes: 1080 for every clip, 720 for one with a `phone` block. */
+/** The encode sizes and their widths. */
 const SIZES = { 1080: 1920, 720: 1280 }
 
 const run = (args) => execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...args], { stdio: 'inherit' })
@@ -108,8 +116,9 @@ for (const c of CLIPS) {
   if (CHAPTER && c.id !== CHAPTER) continue
   const src = join(SOURCE_DIR, c.source)
   statSync(src)
-  if (ONLY === 'all' || ONLY === 'posters') await posters(c, src)
-  for (const size of c.phone ? [1080, 720] : [1080]) {
+  if ((ONLY === 'all' || ONLY === 'posters') && !SIZE) await posters(c, src)
+  for (const size of [1080, 720]) {
+    if (SIZE && size !== SIZE) continue
     if (ONLY === 'all' || ONLY === 'mp4') mp4(c, src, size)
     if (ONLY === 'all' || ONLY === 'webm') webm(c, src, size)
   }

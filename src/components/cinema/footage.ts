@@ -1,9 +1,9 @@
 // When footage may play at all: one answer for the home's stage and the
 // About band, so a metered link or a reduced-motion setting never fetches a
-// clip. Under 760px the home shows its stills (three clips, 2 to 4 MB each);
-// a caller that passes `phones` plays there too, and `size` tells it which
-// encode a viewport that narrow should fetch. Read at mount and again
-// whenever a query flips.
+// clip. Under 760px a caller that passes `phones` plays too, and `size`
+// tells it to fetch the 720 encode there (both callers do, since
+// 2026-09-16); without `phones` a narrow viewport gets the still. Read at
+// mount and again whenever a query flips.
 
 import type { ClipSize } from '@/lib/clips'
 
