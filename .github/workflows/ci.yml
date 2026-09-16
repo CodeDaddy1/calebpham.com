@@ -3,10 +3,11 @@
 # Pushing to main deploys to production, and Vercel never reads these results.
 # Two things make a red commit unable to reach production anyway: `prebuild`
 # runs the test suite inside every Vercel build, and the ruleset on main
-# requires the two jobs below to pass before a push is accepted.
+# requires all three jobs below to pass before a push is accepted.
 #
 # No secrets are needed, and that is deliberate. The site has no environment
-# variables, no database, and no API keys. Keep it that way.
+# variables, no database, and no API keys. Keep it that way. (The one key a
+# script ever used, Pexels, lives in a local file and never on Vercel.)
 
 name: CI
 
@@ -79,6 +80,7 @@ jobs:
   audit:
     name: Dependency audit (blocks at high)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0

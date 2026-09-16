@@ -1,0 +1,4 @@
+Contact: mailto:caleb@lumaiq.dev
+Expires: 2027-09-16T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://calebpham.com/.well-known/security.txt
