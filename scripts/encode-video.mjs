@@ -8,7 +8,9 @@
 //
 // Outputs land in public/video/. Intermediates go to tmp/ (gitignored). The
 // originals never enter the repo; the encoded files are meant to be
-// committed, and src/lib/home.assets.test.ts holds them to a size.
+// committed, and src/lib/home.assets.test.ts holds them to a size. A clip
+// with a `phone` block is also encoded at 720p (1280 wide) for viewports
+// under 760px, where the band is drawn at a third of the size.
 //
 // H.264 for Safari and everything else: 1080p, 24 fps for the 30 fps sources
 // and native for the 25 fps desk clip and the 24 fps About clip, no audio, a
@@ -45,16 +47,25 @@ const CLIPS = [
   { id: 'city', source: '18126746-uhd_3840_2160_30fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' } },
   { id: 'desk', source: '853844-hd_1920_1080_25fps.mp4', fps: null, trim: 10, poster: 1.0, crf: 24, maxrate: '2.4M', bufsize: '4.8M', gop: 50, vp9: { b: '1.5M', maxrate: '2.4M' } },
   { id: 'code', source: '14519236_3840_2160_60fps.mp4', fps: 24, trim: null, poster: 1.0, crf: 23, maxrate: '5M', bufsize: '10M', gop: 48, vp9: { b: '4M', maxrate: '4.6M' } },
-  // Eight seconds at 24 fps: 3.5 Mbps caps the H.264 at 3.5 MB.
-  { id: 'about', source: 'hf_20260916_154523_cb8c7612-a566-41bf-a9fc-02260bb2a4ce.mp4', fps: null, trim: null, poster: 5.0, crf: 23, maxrate: '3.5M', bufsize: '7M', gop: 48, vp9: { b: '2.5M', maxrate: '3M' } },
+  // Eight seconds at 24 fps: 3.5 Mbps caps the H.264 at 3.5 MB; the phone
+  // pair at 1.4 Mbps caps it at 1.4 MB.
+  { id: 'about', source: 'hf_20260916_154523_cb8c7612-a566-41bf-a9fc-02260bb2a4ce.mp4', fps: null, trim: null, poster: 5.0, crf: 23, maxrate: '3.5M', bufsize: '7M', gop: 48, vp9: { b: '2.5M', maxrate: '3M' },
+    phone: { crf: 23, maxrate: '1.4M', bufsize: '2.8M', vp9: { b: '0.9M', maxrate: '1.1M' } } },
 ]
+
+/** The encode sizes: 1080 for every clip, 720 for one with a `phone` block. */
+const SIZES = { 1080: 1920, 720: 1280 }
 
 const run = (args) => execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...args], { stdio: 'inherit' })
 const kb = (p) => `${(statSync(p).size / 1024).toFixed(0)} KB`
 
-function scaleFilter(c) {
-  return c.fps ? `fps=${c.fps},scale=1920:-2:flags=lanczos` : 'scale=1920:-2:flags=lanczos'
+function scaleFilter(c, size) {
+  const scale = `scale=${SIZES[size]}:-2:flags=lanczos`
+  return c.fps ? `fps=${c.fps},${scale}` : scale
 }
+
+/** The rate settings for a size: the clip's own at 1080, its `phone` block at 720. */
+const rates = (c, size) => (size === 720 ? c.phone : c)
 
 async function posters(c, src) {
   const png = join(TMP, `${c.id}.png`)
@@ -70,25 +81,27 @@ async function posters(c, src) {
   }
 }
 
-function mp4(c, src) {
-  const out = join(OUT, `${c.id}-1080.mp4`)
+function mp4(c, src, size) {
+  const r = rates(c, size)
+  const out = join(OUT, `${c.id}-${size}.mp4`)
   const trim = c.trim ? ['-t', String(c.trim)] : []
-  run(['-i', src, ...trim, '-an', '-vf', scaleFilter(c),
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', String(c.crf), '-maxrate', c.maxrate, '-bufsize', c.bufsize,
+  run(['-i', src, ...trim, '-an', '-vf', scaleFilter(c, size),
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', String(r.crf), '-maxrate', r.maxrate, '-bufsize', r.bufsize,
     '-profile:v', 'high', '-level', '4.1', '-pix_fmt', 'yuv420p',
     '-g', String(c.gop), '-keyint_min', String(c.gop), '-sc_threshold', '0', '-movflags', '+faststart', out])
-  console.log(`${c.id}-1080.mp4  ${kb(out)}`)
+  console.log(`${c.id}-${size}.mp4  ${kb(out)}`)
 }
 
-function webm(c, src) {
-  const out = join(OUT, `${c.id}-1080.webm`)
+function webm(c, src, size) {
+  const r = rates(c, size)
+  const out = join(OUT, `${c.id}-${size}.webm`)
   const trim = c.trim ? ['-t', String(c.trim)] : []
-  const common = ['-i', src, ...trim, '-an', '-vf', scaleFilter(c), '-c:v', 'libvpx-vp9', '-b:v', c.vp9.b, '-maxrate', c.vp9.maxrate, '-crf', '34',
+  const common = ['-i', src, ...trim, '-an', '-vf', scaleFilter(c, size), '-c:v', 'libvpx-vp9', '-b:v', r.vp9.b, '-maxrate', r.vp9.maxrate, '-crf', '34',
     '-row-mt', '1', '-deadline', 'good', '-cpu-used', '1', '-g', String(c.gop), '-pix_fmt', 'yuv420p',
-    '-passlogfile', join(TMP, `${c.id}-vp9`)]
+    '-passlogfile', join(TMP, `${c.id}-${size}-vp9`)]
   run([...common, '-pass', '1', '-f', 'null', '/dev/null'])
   run([...common, '-pass', '2', out])
-  console.log(`${c.id}-1080.webm  ${kb(out)}`)
+  console.log(`${c.id}-${size}.webm  ${kb(out)}`)
 }
 
 for (const c of CLIPS) {
@@ -96,6 +109,8 @@ for (const c of CLIPS) {
   const src = join(SOURCE_DIR, c.source)
   statSync(src)
   if (ONLY === 'all' || ONLY === 'posters') await posters(c, src)
-  if (ONLY === 'all' || ONLY === 'mp4') mp4(c, src)
-  if (ONLY === 'all' || ONLY === 'webm') webm(c, src)
+  for (const size of c.phone ? [1080, 720] : [1080]) {
+    if (ONLY === 'all' || ONLY === 'mp4') mp4(c, src, size)
+    if (ONLY === 'all' || ONLY === 'webm') webm(c, src, size)
+  }
 }
