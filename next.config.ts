@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next'
 import createMDX from '@next/mdx'
+import { resolveSecurityEnv, securityHeaders } from './src/lib/security/headers'
 
 const nextConfig: NextConfig = {
   // MDX files are pages and content; typed routes turn a mistyped href into a
@@ -16,16 +17,18 @@ const nextConfig: NextConfig = {
       { source: '/notes/:path*', destination: '/work', permanent: true },
     ]
   },
+  // Security headers on every response, the CSP included. THEY ARE BUILT IN
+  // src/lib/security/headers.ts and pinned by headers.test.ts, which also
+  // walks src/ for any resource that would need a new host. The policy is
+  // enforced, names this origin only, and allows inline scripts because Next
+  // inlines its hydration and a nonce would take every page out of static
+  // rendering ("Static pages are generated at build time, when no request or
+  // response headers exist, so no nonce can be injected"). Headers apply to
+  // pages and public files alike; the video rule below adds a key rather
+  // than replacing the set.
   async headers() {
     return [
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-        ],
-      },
+      { source: '/:path*', headers: securityHeaders(resolveSecurityEnv(process.env)) },
       {
         // The chapter clips and posters are content-addressed by name: a
         // re-encode changes the filename, never the bytes behind a URL, so
