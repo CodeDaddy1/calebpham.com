@@ -1,6 +1,6 @@
 # calebpham.com
 
-Caleb Pham's site: one page for storage owners and operators to meet him and see LumaIQ working.
+Caleb Pham's site: one page for storage owners and operators to meet him and see Verillum AI working.
 
 ## Stack
 
@@ -16,7 +16,7 @@ npm run dev          # http://localhost:3000
 npm run check        # typecheck, lint, build (the build runs the test suite first)
 npm test             # the suite on its own
 npm run icons        # regenerate favicon.ico and apple-icon.png from src/app/icon.svg
-node scripts/encode-screens.mjs <capture dir>   # LumaIQ captures into public/screens
+node scripts/encode-screens.mjs <capture dir>   # app captures into public/screens and src/lib/screens.json
 ```
 
 ## Gates

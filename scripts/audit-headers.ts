@@ -15,6 +15,7 @@
 
 import { chromium, webkit } from 'playwright'
 import { securityHeaders } from '../src/lib/security/headers'
+import SCREENS from '../src/lib/screens.json'
 
 const base = (process.argv.find((a) => a.startsWith('--url='))?.slice(6) ?? 'http://localhost:3000').replace(/\/$/, '')
 const motion = (process.argv.find((a) => a.startsWith('--motion='))?.slice(9) ?? 'reduce') as 'reduce' | 'no-preference'
@@ -55,7 +56,7 @@ async function pass1(routes: string[]): Promise<string[]> {
     ['/does-not-exist', { status: 404, type: 'text/html' }],
     ['/resume', { status: 308, location: '/#about' }],
     ['/work/lumaiq', { status: 308, location: '/#what' }],
-    ['/screens/owner-reports-desktop.webp', { status: 200, type: 'image/webp' }],
+    [SCREENS['owner-reports'].desktop.src, { status: 200, type: 'image/webp' }],
     ['/.well-known/security.txt', { status: 200, type: 'text/plain' }],
   ]
   for (const [path, want] of targets) {

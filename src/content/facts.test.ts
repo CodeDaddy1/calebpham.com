@@ -22,6 +22,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import * as PAGE from '@/lib/page'
+import { SITE } from '@/lib/site'
 
 const SRC = fileURLToPath(new URL('../', import.meta.url))
 
@@ -89,5 +91,19 @@ describe('the record Caleb corrected stays corrected', () => {
       })
     }
     expect(hits).toEqual([])
+  })
+})
+
+describe('the product is Verillum AI', () => {
+  // "We are no longer LumaIQ, we are Verillum AI" (Caleb, 2026-10-21). Every
+  // string the page, the title, the description and the share card read
+  // comes from page.ts or SITE. The one exception is the mail address:
+  // verillumai.com had no mail records on 2026-10-21, so caleb@lumaiq.dev
+  // stays until mail moves, and then this exception goes too.
+  it('never names LumaIQ in the copy', () => {
+    const { email, ...identity } = SITE
+    expect(email).toBe('caleb@lumaiq.dev')
+    const copy = JSON.stringify([PAGE, identity])
+    expect(copy.match(/lumaiq/gi) ?? []).toEqual([])
   })
 })

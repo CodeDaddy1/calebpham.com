@@ -9,8 +9,8 @@ export function SiteFooter() {
         </p>
         <ul>
           <li>
-            <a href={SITE.lumaiq} rel="noopener">
-              lumaiq.dev
+            <a href={SITE.product} rel="noopener">
+              verillumai.com
             </a>
           </li>
           <li>
