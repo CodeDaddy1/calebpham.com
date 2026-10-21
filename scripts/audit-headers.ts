@@ -4,12 +4,11 @@
 //
 // Run:  npx tsx scripts/audit-headers.ts --url=https://calebpham.com [--motion=reduce|no-preference]
 //
-// Pass 1 fetches every sitemap route, the 404, the resume PDF, a poster
-// file and security.txt, and compares headers to the module, so the test
-// suite's pin and the live site are the same thing. Pass 2 loads every HTML
-// route in both engines with a securitypolicyviolation listener installed
-// before any page script runs; --motion=no-preference mounts the clips so
-// media-src is exercised too. A probe path is fetched last and its status
+// Pass 1 fetches every sitemap route, the 404, a retired route (a redirect),
+// a product screen and security.txt, and compares headers to the module, so
+// the test suite's pin and the live site are the same thing. Pass 2 loads
+// every HTML route in both engines with a securitypolicyviolation listener
+// installed before any page script runs. A probe path is fetched last and its status
 // printed: 403 means the firewall rule is live, 404 means the app answered.
 //
 // Exits 1 on any missing or different header, or any policy violation.
@@ -21,7 +20,6 @@ const base = (process.argv.find((a) => a.startsWith('--url='))?.slice(6) ?? 'htt
 const motion = (process.argv.find((a) => a.startsWith('--motion='))?.slice(9) ?? 'reduce') as 'reduce' | 'no-preference'
 
 const EXPECTED = securityHeaders('production')
-const IMMUTABLE = 'public, max-age=31536000, immutable'
 
 async function routesFromSitemap(): Promise<string[]> {
   const xml = await (await fetch(`${base}/sitemap.xml`)).text()
@@ -30,9 +28,16 @@ async function routesFromSitemap(): Promise<string[]> {
 }
 
 /** The headers the site must carry on `path`, and the status and type it must answer with. */
-function checkHeaders(path: string, res: Response, want: { status: number; type?: string; cache?: string }): string[] {
+function checkHeaders(path: string, res: Response, want: { status: number; type?: string; cache?: string; location?: string }): string[] {
   const problems: string[] = []
   if (res.status !== want.status) problems.push(`${path}: status ${res.status}, expected ${want.status}`)
+  // A retired route answers with a bodiless 308. `next start` sends redirects
+  // before the header rules run, so only the status and target are checked.
+  if (want.location !== undefined) {
+    const to = new URL(res.headers.get('location') ?? '', base)
+    if (`${to.pathname}${to.hash}` !== want.location) problems.push(`${path}: redirects to ${to.pathname}${to.hash}, expected ${want.location}`)
+    return problems
+  }
   const type = res.headers.get('content-type') ?? ''
   if (want.type && !type.startsWith(want.type)) problems.push(`${path}: content-type ${type || '(none)'}, expected ${want.type}`)
   for (const { key, value } of EXPECTED) {
@@ -45,11 +50,12 @@ function checkHeaders(path: string, res: Response, want: { status: number; type?
 
 async function pass1(routes: string[]): Promise<string[]> {
   const problems: string[] = []
-  const targets: [string, { status: number; type?: string; cache?: string }][] = [
+  const targets: [string, { status: number; type?: string; cache?: string; location?: string }][] = [
     ...routes.map((r): [string, { status: number; type: string }] => [r, { status: 200, type: 'text/html' }]),
     ['/does-not-exist', { status: 404, type: 'text/html' }],
-    ['/Caleb-Pham-Resume.pdf', { status: 200, type: 'application/pdf' }],
-    ['/video/about-poster-900.webp', { status: 200, type: 'image/webp', cache: IMMUTABLE }],
+    ['/resume', { status: 308, location: '/#about' }],
+    ['/work/lumaiq', { status: 308, location: '/#what' }],
+    ['/screens/owner-reports-desktop.webp', { status: 200, type: 'image/webp' }],
     ['/.well-known/security.txt', { status: 200, type: 'text/plain' }],
   ]
   for (const [path, want] of targets) {

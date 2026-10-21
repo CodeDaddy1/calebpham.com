@@ -13,20 +13,20 @@ export const OG_CONTENT_TYPE = 'image/png'
 // CSS variables, so these are literals, and globals.contrast.test.ts fails if
 // they drift from the tokens. A card that does not look like the site is a
 // small lie at the top of every share.
-const INK = '#EDEDED'
-const MUTED = '#8A8A8A'
-const MUTED_STRONG = '#C9C9C9'
-const ACCENT = '#EDEDED'
-const ACCENT_ON = '#0B0B0B'
-const PAGE = '#0B0B0B'
-const CARD = '#141414'
-const BORDER = 'rgba(255, 255, 255, 0.18)'
+const INK = '#1A2130'
+const MUTED = 'rgba(26, 33, 48, 0.65)'
+const MUTED_STRONG = 'rgba(26, 33, 48, 0.82)'
+const ACCENT = '#047857'
+const ACCENT_ON = '#FFFFFF'
+const PAGE = '#F7F7F8'
+const CARD = '#FFFFFF'
+const BORDER = 'rgba(11, 16, 32, 0.09)'
 
 // ACCENT_ON is the ink on an accent fill. The card draws no filled control
 // today; the literal is pinned so the day it does, the ink is the measured one.
 void ACCENT_ON
 
-/** The mark: two light bars forming a corner, the same shape as icon.svg. */
+/** The mark: two green bars forming a corner, the same shape as icon.svg. */
 function Mark() {
   return (
     <div style={{ display: 'flex', position: 'relative', width: 56, height: 56 }}>

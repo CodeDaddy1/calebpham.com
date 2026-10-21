@@ -14,7 +14,6 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import sitemap from './sitemap'
 import { SITE_URL } from '@/lib/site'
-import { publishedProjects } from '@/lib/projects'
 
 const APP = fileURLToPath(new URL('.', import.meta.url))
 
@@ -34,10 +33,9 @@ function pageRoutes(dir = APP, prefix = ''): string[] {
   return out
 }
 
-/** `/work/[slug]` becomes one route per published item; unknown patterns throw. */
+/** A dynamic segment needs its own expansion here before it can ship. */
 function expand(route: string): string[] {
   if (!route.includes('[')) return [route]
-  if (route === '/work/[slug]') return publishedProjects().map((p) => `/work/${p.slug}`)
   throw new Error(`sitemap.test.ts does not know how to expand ${route}`)
 }
 

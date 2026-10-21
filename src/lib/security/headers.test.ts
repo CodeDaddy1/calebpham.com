@@ -129,12 +129,10 @@ describe('the header set', () => {
 })
 
 describe('next.config.ts wiring', () => {
-  it('puts the module headers on every path and keeps the immutable video rule', async () => {
+  it('puts the module headers on every path, once', async () => {
     const rules = await nextConfig.headers!()
     const all = rules.find((r) => r.source === '/:path*')
     expect(all?.headers).toEqual(securityHeaders(resolveSecurityEnv(process.env)))
-    const video = rules.find((r) => r.source === '/video/:path*')
-    expect(video?.headers).toEqual([{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }])
     expect(rules.filter((r) => r.headers.some((h) => h.key === 'Content-Security-Policy'))).toHaveLength(1)
   })
 

@@ -39,6 +39,10 @@ describe('identity', () => {
   it('carries the values the whole site reads', () => {
     expect(SITE.email).toBe('caleb@lumaiq.dev')
     expect(SITE.linkedin).toMatch(/^https:\/\/www\.linkedin\.com\/in\//)
-    expect(SITE.title).toBe('Founder and Software Engineer, Proptech')
+    expect(SITE.title).toBe('Founder of LumaIQ')
+  })
+
+  it('sends every demo request to LumaIQ\'s own form', () => {
+    expect(SITE.demo).toBe('https://www.lumaiq.dev/demo')
   })
 })

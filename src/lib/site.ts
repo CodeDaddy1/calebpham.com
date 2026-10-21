@@ -35,10 +35,15 @@ export function absoluteUrl(path: string): string {
 
 export const SITE = {
   name: 'Caleb Pham',
-  title: 'Founder and Software Engineer, Proptech',
-  location: 'Houston, TX',
+  title: 'Founder of LumaIQ',
+  location: 'Houston, Texas',
   email: 'caleb@lumaiq.dev',
   linkedin: 'https://www.linkedin.com/in/caleb-pham-1b8464252',
+  lumaiq: 'https://www.lumaiq.dev',
+  // Every "Book a demo" opens LumaIQ's own request form (ruled 2026-10-19):
+  // it already has the honeypot, the rate limit, the mail to Caleb and the
+  // approval desk, so this site collects nothing.
+  demo: 'https://www.lumaiq.dev/demo',
   description:
-    'Founder and software engineer in Houston. Six storage properties in two Texas markets, then LumaIQ, built alone: the bridge between store teams and home office.',
+    'I ran storage properties, then built LumaIQ: owner reports, rate increases and a lien calendar from the reports your stores already produce. Book a demo.',
 } as const

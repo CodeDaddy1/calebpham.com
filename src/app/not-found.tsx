@@ -1,29 +1,20 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Container } from '@/components/container'
-import { PageBand } from '@/components/page-band'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
 
 export const metadata: Metadata = { title: 'Not found' }
 
-// The global 404 renders inside the root layout only, so it draws the site
-// chrome itself.
+// The global 404 renders inside the root layout, so the header, with Book a
+// demo, and the footer are already around it.
 export default function NotFound() {
   return (
-    <>
-      <SiteHeader />
-      <main id="main" className="site-main flex-1">
-        <PageBand label="404" title="Not found" banner="not-found" lede="There is no page at this address." />
-        <Container className="py-12">
-          <p className="rise-in">
-            <Link href="/" className="pill pill-secondary">
-              Back to the start
-            </Link>
-          </p>
-        </Container>
-      </main>
-      <SiteFooter />
-    </>
+    <section className="not-found" aria-labelledby="not-found-title">
+      <div className="wrap">
+        <p className="label">404</p>
+        <h1 id="not-found-title">There is no page at this address.</h1>
+        <Link href="/" className="btn">
+          Back to the start
+        </Link>
+      </div>
+    </section>
   )
 }

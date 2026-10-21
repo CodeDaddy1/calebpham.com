@@ -9,9 +9,14 @@
 // never "an operator"; the word survives only as the industry noun for the
 // companies ("self-storage operators").
 //
-// WHAT BREAKS IF THIS IS WRONG: a hiring manager reads a number Caleb did not
-// give, or a label he refused, on a page in his name. Nothing on screen
-// shows the difference between a fact and a leftover.
+// On 2026-10-19 the site turned to clients (storage owners, operators and
+// heads of operations) and kept only his story and LumaIQ shown working.
+// The four management figures (six properties, two markets, 3,000 units,
+// 350,000 square feet), MDCB Study and The Ninth Room went with the resume.
+//
+// WHAT BREAKS IF THIS IS WRONG: a client reads a number Caleb did not give,
+// or a label he refused, on a page in his name. Nothing on screen shows the
+// difference between a fact and a leftover.
 
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
@@ -38,12 +43,18 @@ const RETIRED: [string, RegExp][] = [
   ['occupancy range', /\b87 to 92\b|\b87\s*[-–]\s*92\b/],
   ['team size', /\bteam of 14\b/i],
   ['Houston Area Manager as a title', /Houston Area Manager/],
+  ['six properties', /\bsix (?:self-storage |storage )?properties\b/i],
+  ['two markets', /\btwo (?:Texas )?markets\b/i],
+  ['3,000 units', /\b3,000\b/],
+  ['350,000 square feet', /\b350,000\b/],
+  ['MDCB Study', /MDCB/i],
+  ['The Ninth Room', /Ninth Room/i],
 ]
 
 /** "Operator" said of Caleb. The plural noun for the companies is allowed. */
 const OPERATOR_OF_CALEB = /\boperator turned\b|\ban operator\b|\bas an operator\b|\bformer operator\b|\bthe operator I was\b/i
 
-describe('the record Caleb corrected on 2026-09-12 stays corrected', () => {
+describe('the record Caleb corrected stays corrected', () => {
   const files = walk(SRC)
 
   for (const [name, pattern] of RETIRED) {

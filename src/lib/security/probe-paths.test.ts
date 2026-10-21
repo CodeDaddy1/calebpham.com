@@ -61,7 +61,6 @@ describe('leaves every real path alone', () => {
   const routes = sitemap().map((e) => e.url.replace(SITE_URL, '') || '/')
 
   it('walks the sitemap', () => {
-    expect(routes.length).toBeGreaterThanOrEqual(7)
     expect(routes).toContain('/')
   })
 
@@ -72,7 +71,7 @@ describe('leaves every real path alone', () => {
 
   it('every file under public/', () => {
     const served = files(PUBLIC)
-    expect(served.length).toBeGreaterThan(30)
+    expect(served.length).toBeGreaterThan(5)
     expect(served.filter(isProbePath)).toEqual([])
   })
 
@@ -84,7 +83,12 @@ describe('leaves every real path alone', () => {
     '/apple-icon.png',
     '/opengraph-image',
     '/opengraph-image-abc123',
-    '/work/lumaiq/opengraph-image',
+    // Retired on 2026-10-21; each redirects to its section on the one page.
+    '/about',
+    '/resume',
+    '/Caleb-Pham-Resume.pdf',
+    '/work',
+    '/work/lumaiq',
     '/_next/static/chunks/a.js',
     '/_next/image?url=%2Fteam%2Fcaleb-pham.jpg',
     '/_vercel/insights/script.js',
