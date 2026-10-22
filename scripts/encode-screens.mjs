@@ -10,7 +10,7 @@
 // 2.6x without asking next/image for pixels the source does not have.
 //
 // Desktop captures lose the app's 232px sidebar: it is navigation, not the
-// job, and until the app's own rename it carries the old name (2026-10-21).
+// job.
 //
 // Every file is named by its content (<name>-<kind>-<hash>.webp) and listed
 // in src/lib/screens.json, which the page reads. A retake therefore gets a

@@ -97,13 +97,10 @@ describe('the record Caleb corrected stays corrected', () => {
 describe('the product is Verillum AI', () => {
   // "We are no longer LumaIQ, we are Verillum AI" (Caleb, 2026-10-21). Every
   // string the page, the title, the description and the share card read
-  // comes from page.ts or SITE. The one exception is the mail address:
-  // verillumai.com had no mail records on 2026-10-21, so caleb@lumaiq.dev
-  // stays until mail moves, and then this exception goes too.
+  // comes from page.ts or SITE, the mail address included (it moved to
+  // verillumai.com on switch day).
   it('never names LumaIQ in the copy', () => {
-    const { email, ...identity } = SITE
-    expect(email).toBe('caleb@lumaiq.dev')
-    const copy = JSON.stringify([PAGE, identity])
+    const copy = JSON.stringify([PAGE, SITE])
     expect(copy.match(/lumaiq/gi) ?? []).toEqual([])
   })
 })

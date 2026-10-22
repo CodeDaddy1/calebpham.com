@@ -8,8 +8,8 @@ export const metadata: Metadata = { alternates: { canonical: '/' } }
 
 // The whole site, one page, in the order Caleb ruled on 2026-10-19: who he
 // is and the one action, what has happened so far, the three jobs shown on
-// real LumaIQ screens, who builds it, and how a demo goes. Every Book a demo
-// opens LumaIQ's form. The walk-through video slots in under the hero once
+// real Verillum AI screens, who builds it, and how a demo goes. Every Book a
+// demo opens the app's own request form. The walk-through video slots in under the hero once
 // its final take is recorded.
 export default function HomePage() {
   return (

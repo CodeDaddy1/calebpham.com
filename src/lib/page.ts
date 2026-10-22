@@ -5,10 +5,12 @@
 // Connector. We have Filed C Corp as Verillum AI"), and the same day the
 // product's name became Verillum AI ("We are no longer LumaIQ, we are
 // Verillum AI"), so the page never says LumaIQ (facts.test.ts). Each
-// milestone says exactly what has happened, no more: the plugin is in
-// OpenAI's review, not listed; the Claude connection is a connector anyone
-// signed in can add, not a directory listing; the company is filed. When one
-// of those changes, change its line here.
+// milestone says exactly what has happened, no more: OpenAI approved the
+// plugin's first version (Caleb, 2026-10-21: "We were approved for the first
+// version of our public plugin and continuing to update and bring new
+// features"); the Claude connection is a connector anyone signed in can add,
+// not a directory listing; the company is filed. When one of those changes,
+// change its line here.
 //
 // length.test.ts and diction.test.ts read this file; facts.test.ts reads the
 // whole tree.
@@ -34,7 +36,7 @@ export const MILESTONES = {
     {
       source: 'OpenAI',
       title: 'ChatGPT plugin',
-      text: 'Our reporting plugin went to OpenAI in October 2026 for the ChatGPT plugin directory. It is in review.',
+      text: 'OpenAI approved the first version of our reporting plugin for ChatGPT. New versions and features follow under the Verillum AI name.',
     },
     {
       source: 'Anthropic',

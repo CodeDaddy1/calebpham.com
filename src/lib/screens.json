@@ -1,36 +1,36 @@
 {
   "rate-increases": {
     "desktop": {
-      "src": "/screens/rate-increases-desktop-38f920c3.webp",
+      "src": "/screens/rate-increases-desktop-ef25b76b.webp",
       "width": 1368,
       "height": 1000
     },
     "phone": {
-      "src": "/screens/rate-increases-phone-916651b7.webp",
+      "src": "/screens/rate-increases-phone-bedfe171.webp",
       "width": 780,
       "height": 1688
     }
   },
   "owner-reports": {
     "desktop": {
-      "src": "/screens/owner-reports-desktop-cafc7f07.webp",
+      "src": "/screens/owner-reports-desktop-f4758baa.webp",
       "width": 1368,
       "height": 1000
     },
     "phone": {
-      "src": "/screens/owner-reports-phone-2f3b13c0.webp",
+      "src": "/screens/owner-reports-phone-bd914c50.webp",
       "width": 780,
       "height": 1688
     }
   },
   "lien": {
     "desktop": {
-      "src": "/screens/lien-desktop-fea71462.webp",
+      "src": "/screens/lien-desktop-c5d11816.webp",
       "width": 1368,
       "height": 1000
     },
     "phone": {
-      "src": "/screens/lien-phone-c37382d8.webp",
+      "src": "/screens/lien-phone-ace41bd1.webp",
       "width": 780,
       "height": 1688
     }

@@ -37,15 +37,14 @@ export const SITE = {
   name: 'Caleb Pham',
   title: 'Founder of Verillum AI',
   location: 'Houston, Texas',
-  // verillumai.com has no mail records yet (checked 2026-10-21), so the
-  // address stays on the old domain until mail moves.
-  email: 'caleb@lumaiq.dev',
+  // Google Workspace mail on verillumai.com since 2026-10-21 (a test send
+  // reached this inbox that day).
+  email: 'caleb@verillumai.com',
   linkedin: 'https://www.linkedin.com/in/caleb-pham-1b8464252',
   product: 'https://www.verillumai.com',
   // Every "Book a demo" opens the app's own request form (ruled 2026-10-19):
   // it already has the honeypot, the rate limit, the mail to Caleb and the
-  // approval desk, so this site collects nothing. verillumai.com serves the
-  // same app as lumaiq.dev.
+  // approval desk, so this site collects nothing.
   demo: 'https://www.verillumai.com/demo',
   description:
     'I ran storage properties, then built Verillum AI: owner reports, rate increases and a lien calendar from the reports your stores already produce. Book a demo.',
