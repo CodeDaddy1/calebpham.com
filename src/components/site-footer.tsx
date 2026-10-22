@@ -1,26 +1,25 @@
 import { SITE } from '@/lib/site'
-import { Container } from './container'
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-line py-10 text-[0.9375rem] text-muted">
-      <Container className="flex flex-wrap items-center justify-between gap-4">
-        <p className="m-0">
-          {SITE.name}, {SITE.location}
+    <footer className="site-footer">
+      <div className="wrap">
+        <p>
+          {SITE.name} · {SITE.location}
         </p>
-        <ul className="m-0 flex list-none gap-6 p-0">
+        <ul>
           <li>
-            <a href={`mailto:${SITE.email}`} className="inline-flex min-h-11 items-center hover:text-accent">
-              Email
+            <a href={SITE.product} rel="noopener">
+              verillumai.com
             </a>
           </li>
           <li>
-            <a href={SITE.linkedin} rel="noopener" className="inline-flex min-h-11 items-center hover:text-accent">
+            <a href={SITE.linkedin} rel="noopener">
               LinkedIn
             </a>
           </li>
         </ul>
-      </Container>
+      </div>
     </footer>
   )
 }

@@ -2,7 +2,7 @@
 //
 // Run with:  npm run icons
 //
-// Port of LumaIQ's script. The mark is two light bars forming a corner, the
+// Port of LumaIQ's script. The mark is two green bars forming a corner, the
 // same shape the OG card draws in src/lib/og-image.tsx. Every output is built
 // by scaling one SVG, so a size can be added without a hand-pasted raster.
 //
@@ -17,8 +17,8 @@ import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
-const GROUND = '#0B0B0B' // --background
-const MARK = '#EDEDED' // --accent
+const GROUND = '#F7F7F8' // --background
+const MARK = '#047857' // --accent
 
 // The mark in its own 56-unit space: a 44 by 12 bar over a 12 by 44 bar,
 // sharing the top-left corner. Its ink spans x 6 to 50, y 6 to 50.

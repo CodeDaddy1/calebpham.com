@@ -1,0 +1,38 @@
+{
+  "rate-increases": {
+    "desktop": {
+      "src": "/screens/rate-increases-desktop-ef25b76b.webp",
+      "width": 1368,
+      "height": 1000
+    },
+    "phone": {
+      "src": "/screens/rate-increases-phone-bedfe171.webp",
+      "width": 780,
+      "height": 1688
+    }
+  },
+  "owner-reports": {
+    "desktop": {
+      "src": "/screens/owner-reports-desktop-f4758baa.webp",
+      "width": 1368,
+      "height": 1000
+    },
+    "phone": {
+      "src": "/screens/owner-reports-phone-bd914c50.webp",
+      "width": 780,
+      "height": 1688
+    }
+  },
+  "lien": {
+    "desktop": {
+      "src": "/screens/lien-desktop-c5d11816.webp",
+      "width": 1368,
+      "height": 1000
+    },
+    "phone": {
+      "src": "/screens/lien-phone-ace41bd1.webp",
+      "width": 780,
+      "height": 1688
+    }
+  }
+}

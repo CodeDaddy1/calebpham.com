@@ -1,20 +1,25 @@
 import type { NextConfig } from 'next'
-import createMDX from '@next/mdx'
 import { resolveSecurityEnv, securityHeaders } from './src/lib/security/headers'
 
 const nextConfig: NextConfig = {
-  // MDX files are pages and content; typed routes turn a mistyped href into a
-  // type error, which is the mistake a beginner makes most.
-  pageExtensions: ['ts', 'tsx', 'mdx'],
+  // Typed routes turn a mistyped href into a type error, which is the mistake
+  // a beginner makes most.
   typedRoutes: true,
   poweredByHeader: false,
-  images: { formats: ['image/avif', 'image/webp'], qualities: [60, 75] },
-  // Notes was removed on 2026-09-12 after one note had been live for a day and
-  // in the sitemap; anything that indexed it lands on the case studies.
+  // Screens carry small text, so they get the higher of the two qualities.
+  images: { formats: ['image/avif', 'image/webp'], qualities: [60, 75, 85] },
+  // The site became one page on 2026-10-21. Every address the old site
+  // published (the case studies, About, the resume and its PDF, and Notes,
+  // already retired on 2026-09-12) lands on the section that replaced it.
   async redirects() {
     return [
-      { source: '/notes', destination: '/work', permanent: true },
-      { source: '/notes/:path*', destination: '/work', permanent: true },
+      { source: '/about', destination: '/#about', permanent: true },
+      { source: '/work', destination: '/#what', permanent: true },
+      { source: '/work/:path*', destination: '/#what', permanent: true },
+      { source: '/resume', destination: '/#about', permanent: true },
+      { source: '/Caleb-Pham-Resume.pdf', destination: '/#about', permanent: true },
+      { source: '/notes', destination: '/#what', permanent: true },
+      { source: '/notes/:path*', destination: '/#what', permanent: true },
     ]
   },
   // Security headers on every response, the CSP included. THEY ARE BUILT IN
@@ -24,24 +29,10 @@ const nextConfig: NextConfig = {
   // inlines its hydration and a nonce would take every page out of static
   // rendering ("Static pages are generated at build time, when no request or
   // response headers exist, so no nonce can be injected"). Headers apply to
-  // pages and public files alike; the video rule below adds a key rather
-  // than replacing the set.
+  // pages and public files alike.
   async headers() {
-    return [
-      { source: '/:path*', headers: securityHeaders(resolveSecurityEnv(process.env)) },
-      {
-        // The chapter clips and posters are content-addressed by name: a
-        // re-encode changes the filename, never the bytes behind a URL, so
-        // the browser may keep them for a year.
-        source: '/video/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-    ]
+    return [{ source: '/:path*', headers: securityHeaders(resolveSecurityEnv(process.env)) }]
   },
 }
 
-// No remark or rehype plugins. Under Turbopack a plugin must be passed as a
-// string name (node_modules/next/dist/docs/01-app/02-guides/mdx.md, "Using
-// Plugins with Turbopack"); nothing here needs one. Code highlighting is a
-// server component, not a plugin, so its colours stay under the contrast gate.
-export default createMDX({})(nextConfig)
+export default nextConfig

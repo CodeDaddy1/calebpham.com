@@ -37,8 +37,12 @@ describe('absoluteUrl', () => {
 
 describe('identity', () => {
   it('carries the values the whole site reads', () => {
-    expect(SITE.email).toBe('caleb@lumaiq.dev')
+    expect(SITE.email).toBe('caleb@verillumai.com')
     expect(SITE.linkedin).toMatch(/^https:\/\/www\.linkedin\.com\/in\//)
-    expect(SITE.title).toBe('Founder and Software Engineer, Proptech')
+    expect(SITE.title).toBe('Founder of Verillum AI')
+  })
+
+  it('sends every demo request to the app\'s own form', () => {
+    expect(SITE.demo).toBe('https://www.verillumai.com/demo')
   })
 })

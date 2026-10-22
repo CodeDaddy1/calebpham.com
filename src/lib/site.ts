@@ -35,10 +35,17 @@ export function absoluteUrl(path: string): string {
 
 export const SITE = {
   name: 'Caleb Pham',
-  title: 'Founder and Software Engineer, Proptech',
-  location: 'Houston, TX',
-  email: 'caleb@lumaiq.dev',
+  title: 'Founder of Verillum AI',
+  location: 'Houston, Texas',
+  // Google Workspace mail on verillumai.com since 2026-10-21 (a test send
+  // reached this inbox that day).
+  email: 'caleb@verillumai.com',
   linkedin: 'https://www.linkedin.com/in/caleb-pham-1b8464252',
+  product: 'https://www.verillumai.com',
+  // Every "Book a demo" opens the app's own request form (ruled 2026-10-19):
+  // it already has the honeypot, the rate limit, the mail to Caleb and the
+  // approval desk, so this site collects nothing.
+  demo: 'https://www.verillumai.com/demo',
   description:
-    'Founder and software engineer in Houston. Six storage properties in two Texas markets, then LumaIQ, built alone: the bridge between store teams and home office.',
+    'I ran storage properties, then built Verillum AI: owner reports, rate increases and a lien calendar from the reports your stores already produce. Book a demo.',
 } as const

@@ -3,34 +3,27 @@
 // Every colour token that can carry text is measured against BOTH surfaces it
 // can land on (the card and the page) because a token that clears 4.5:1 on
 // one and fails on the other fails silently: the build is green, the types
-// are fine, and the copy is simply hard to read on half the pages.
+// are fine, and the copy is simply hard to read on half the page.
 //
 // This is a port of LumaIQ's gate, which exists because a muted token shipped
-// at 2.78:1 across 610 call sites and nothing caught it. Here it also measures
-// each case study's swatch block, the glass panel over the brightest frame the
-// home video can show, the print palette on paper, and pins the literal
-// palettes inside the OG card and the icon script, which cannot read CSS
-// variables.
+// at 2.78:1 across 610 call sites and nothing caught it. Here it also pins
+// the literal palettes inside the OG card and the icon script, which cannot
+// read CSS variables.
 //
-// WHAT BREAKS IF THIS IS WRONG: a hiring manager on a phone in daylight cannot
-// read the line that says what you built. The failure is not a crash. It is a
-// paragraph nobody finishes.
+// WHAT BREAKS IF THIS IS WRONG: a storage owner on a phone in daylight cannot
+// read the line that says what LumaIQ does. The failure is not a crash. It is
+// a paragraph nobody finishes.
 //
 // If a token has to change, change it and re-run this. Do not relax the floor.
 
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { PROJECTS } from '@/lib/projects'
 
 const CSS = readFileSync(fileURLToPath(new URL('./globals.css', import.meta.url)), 'utf-8')
-const CINEMA_PATH = fileURLToPath(new URL('./cinema.css', import.meta.url))
-const CINEMA = existsSync(CINEMA_PATH) ? readFileSync(CINEMA_PATH, 'utf-8') : ''
-const stripComments = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '')
 
-/** WCAG 2.1 AA for normal-size text, and the floor for a control's boundary. */
+/** WCAG 2.1 AA for normal-size text. */
 const AA_NORMAL = 4.5
-const AA_NON_TEXT = 3
 
 type RGB = [number, number, number]
 
@@ -82,18 +75,7 @@ const surfaces: [string, RGB][] = [
 ]
 
 /** Tokens that are rendered as text somewhere on the site. */
-const TEXT_TOKENS = [
-  '--foreground',
-  '--muted-strong',
-  '--muted',
-  '--accent',
-  '--code-keyword',
-  '--code-string',
-  '--code-comment',
-  '--code-function',
-  '--code-constant',
-  '--code-punctuation',
-] as const
+const TEXT_TOKENS = ['--foreground', '--muted-strong', '--muted', '--accent'] as const
 
 describe('text tokens', () => {
   for (const token of TEXT_TOKENS) {
@@ -105,9 +87,9 @@ describe('text tokens', () => {
     }
   }
 
-  // An accent is very often set as text on its OWN tint (a label on a chip, a
-  // callout eyebrow). That tint is a third surface, and it is the one an
-  // accent fails on first.
+  // The accent is set as text on its OWN tint (the Demo data chip on every
+  // screen frame). That tint is a third surface, and it is the one an accent
+  // fails on first.
   for (const [surfaceName, surface] of surfaces) {
     it(`--accent stays readable on its own tint over the ${surfaceName}`, () => {
       const tint = resolve(root['--accent-soft'], surface)
@@ -125,115 +107,11 @@ describe('text tokens', () => {
     expect(strong / muted).toBeGreaterThanOrEqual(1.3)
   })
 
-  it('the accent-on ink clears AA on the accent fill and its hover (primary pill, skip link)', () => {
+  it('the accent-on ink clears AA on the accent fill and its hover (every button, the skip link)', () => {
     const on = hexToRgb(root['--accent-on'])
     expect(contrast(on, hexToRgb(root['--accent']))).toBeGreaterThanOrEqual(AA_NORMAL)
     expect(contrast(on, hexToRgb(root['--accent-hover']))).toBeGreaterThanOrEqual(AA_NORMAL)
   })
-
-  it('the control boundary clears the non-text floor on the page', () => {
-    const page = hexToRgb(root['--background'])
-    const edge = resolve(root['--border-control'], page)
-    expect(contrast(edge, page)).toBeGreaterThanOrEqual(AA_NON_TEXT)
-  })
-})
-
-// Each case study's swatch block is keyed by its route slug, so the index and
-// the CSS cannot drift: a project without a block fails here by name.
-describe.each(PROJECTS.map((p) => p.slug))('swatch %s', (slug) => {
-  const s = tokenBlock(String.raw`\[data-swatch='${slug}'\]`)
-
-  for (const [surfaceName, surface] of surfaces) {
-    it(`--swatch-ink on the ${surfaceName} clears AA`, () => {
-      const ratio = contrast(resolve(s['--swatch-ink'], surface), surface)
-      expect(ratio, `${slug} ink on ${surfaceName} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
-    })
-
-    it(`--swatch-ink on --swatch-soft over the ${surfaceName} clears AA`, () => {
-      const tint = resolve(s['--swatch-soft'], surface)
-      const ratio = contrast(resolve(s['--swatch-ink'], tint), tint)
-      expect(ratio, `${slug} ink on its tint over ${surfaceName} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
-    })
-  }
-
-  it('--swatch-on against --swatch clears AA', () => {
-    const fill = hexToRgb(s['--swatch'])
-    const ratio = contrast(resolve(s['--swatch-on'], fill), fill)
-    expect(ratio, `${slug} on-colour against the fill is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
-  })
-})
-
-describe('the Ninth Room extras', () => {
-  const s = tokenBlock(String.raw`\[data-swatch='the-ninth-room'\]`)
-  const page = hexToRgb(root['--background'])
-
-  it('chalk is readable on navy', () => {
-    const navy = hexToRgb(s['--swatch'])
-    expect(contrast(hexToRgb(s['--nr-chalk']), navy)).toBeGreaterThanOrEqual(AA_NORMAL)
-  })
-
-  it('chalk is readable on the ground', () => {
-    expect(contrast(hexToRgb(s['--nr-chalk']), page)).toBeGreaterThanOrEqual(AA_NORMAL)
-  })
-
-  it('the on-yellow ink is readable on the yellow fill', () => {
-    // --foreground is light and measures 1.12 on the yellow; a marker needs
-    // its own dark ink.
-    const yellow = hexToRgb(s['--nr-yellow'])
-    expect(contrast(hexToRgb(s['--nr-on-yellow']), yellow)).toBeGreaterThanOrEqual(AA_NORMAL)
-  })
-})
-
-describe('the glass panel over the brightest frame the video can show', () => {
-  // The home video is footage nobody measured; the worst case under the glass
-  // is a white frame. The panel is measured over that, not over the ground.
-  const glass = resolve(root['--glass'], [255, 255, 255])
-
-  for (const token of ['--foreground', '--muted-strong'] as const) {
-    it(`${token} on the glass clears AA`, () => {
-      const ratio = contrast(hexToRgb(root[token]), glass)
-      expect(ratio, `${token} on the glass over white is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_NORMAL)
-    })
-  }
-
-  it('--muted does NOT, which is why .glass re-scopes --muted to --muted-strong', () => {
-    expect(contrast(hexToRgb(root['--muted']), glass)).toBeLessThan(AA_NORMAL)
-    if (CINEMA) expect(stripComments(CINEMA)).toMatch(/^\.glass\s*\{[^}]*--muted:\s*var\(--muted-strong\);/m)
-  })
-})
-
-describe('the pre-reveal word colour', () => {
-  it('is not a text token and only applies while JavaScript has armed the statement', () => {
-    expect(TEXT_TOKENS as readonly string[]).not.toContain('--word-unlit')
-    const rules = [...stripComments(CSS + '\n' + CINEMA).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-      .filter((m) => m[2].includes('var(--word-unlit)'))
-      .map((m) => m[1].trim())
-    for (const sel of rules) expect(sel, `${sel} paints --word-unlit outside the armed statement`).toMatch(/^\[data-statement-ready\]/)
-    // The reduced-motion block never arms the statement, so it never sets it either.
-    const reduced = stripComments(CSS + '\n' + CINEMA).match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\n\}/g) ?? []
-    for (const block of reduced) expect(block).not.toContain('--word-unlit')
-  })
-})
-
-describe('the print palette is a paper document', () => {
-  it('overrides the tokens on :root, not on a weaker selector', () => {
-    const block = CSS.slice(CSS.indexOf('@media print'))
-    expect(block).toMatch(/\n  :root\s*\{[^}]*--foreground:/)
-    expect(block).not.toMatch(/\n  html\s*\{[^}]*--foreground:/)
-  })
-
-  const at = CSS.indexOf('@media print')
-  // The print block redefines the tokens on an indented :root (same specificity
-  // as the screen block, later in the file). A type selector would lose to :root.
-  const print = tokenBlock('  :root', CSS.slice(at))
-  const paper = hexToRgb(print['--background'])
-
-  for (const token of ['--foreground', '--muted-strong', '--muted'] as const) {
-    it(`${token} in print clears AA on paper`, () => {
-      const ratio = contrast(resolve(print[token], paper), paper)
-      expect(ratio, `print ${token} is ${ratio.toFixed(2)}:1 on paper`).toBeGreaterThanOrEqual(AA_NORMAL)
-    })
-  }
 })
 
 describe('the OG card and the icon script keep their frozen palettes in sync', () => {
